@@ -47,12 +47,13 @@
     async function ensureAdminExists() {
       try {
         await createUserWithEmailAndPassword(auth, "mangotangodev.ph@gmail.com", "admin@mangotango2025");
-        console.log("Admin account created successfully");
+        console.log("✅ Admin account created successfully");
       } catch (error) {
         if (error.code === 'auth/email-already-in-use') {
-          console.log("Admin account already exists");
+          console.log("✅ Admin account already exists - ready to login");
         } else {
-          console.error("Error creating admin account:", error);
+          console.error("❌ Error with admin account:", error);
+          // Don't show error to user for account creation issues
         }
       }
     }
