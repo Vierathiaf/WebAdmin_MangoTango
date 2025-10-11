@@ -6,99 +6,248 @@
   <title>MangoTango Admin System</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    .welcome-container {
-      text-align: center;
-      padding: 40px 20px;
+    body.landing-page {
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
-    .welcome-title {
-      font-size: 28px;
-      font-weight: 700;
-      color: #2d3748;
-      margin: 20px 0 10px 0;
+    .landing-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 60px 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
     }
     
-    .welcome-subtitle {
-      font-size: 16px;
-      color: #718096;
+    .hero-content {
+      color: white;
+      text-align: left;
+    }
+    
+    .hero-title {
+      font-size: 48px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+    
+    .hero-subtitle {
+      font-size: 20px;
       margin-bottom: 30px;
-      line-height: 1.5;
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 40px;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      color: white;
+      font-size: 16px;
+    }
+    
+    .feature-item::before {
+      content: "✓";
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      font-weight: bold;
     }
     
     .get-started-btn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      background: white;
+      color: #667eea;
       border: none;
-      padding: 15px 40px;
-      border-radius: 50px;
-      font-size: 16px;
-      font-weight: 600;
+      padding: 18px 40px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
       text-decoration: none;
       display: inline-block;
-      margin-top: 10px;
     }
     
     .get-started-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-      background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+      background: #f8fafc;
     }
     
-    .features-list {
-      text-align: left;
-      max-width: 300px;
-      margin: 30px auto 0;
-      color: #4a5568;
-    }
-    
-    .features-list li {
-      margin: 8px 0;
-      padding-left: 20px;
+    .admin-panel {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      text-align: center;
       position: relative;
+      overflow: hidden;
     }
     
-    .features-list li::before {
-      content: "✓";
+    .admin-panel::before {
+      content: "";
       position: absolute;
+      top: 0;
       left: 0;
-      color: #48bb78;
-      font-weight: bold;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .admin-logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 20px;
+    }
+    
+    .admin-panel-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 15px;
+    }
+    
+    .admin-panel-subtitle {
+      color: #718096;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+    
+    .login-preview {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 2px dashed #e2e8f0;
+    }
+    
+    .login-preview p {
+      margin: 8px 0;
+      color: #4a5568;
+      font-size: 14px;
+    }
+    
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 24px;
+      font-weight: 700;
+      color: #667eea;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    @media (max-width: 768px) {
+      .landing-container {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        padding: 40px 20px;
+      }
+      
+      .hero-content {
+        text-align: center;
+      }
+      
+      .hero-title {
+        font-size: 36px;
+      }
+      
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
-<body class="login-page">
-  <div class="container">
-    <div class="login-box">
-      <div class="welcome-container">
-        <img src="images/mango.png" class="Logo" alt="MangoTango Logo">
-        <h1 class="welcome-title">MangoTango Admin System</h1>
-        <p class="welcome-subtitle">
-          Professional admin dashboard for managing technicians, analytics, and system operations.
-        </p>
-        
-        <a href="admin-login.html" class="get-started-btn">
-          🚀 Get Started
-        </a>
-        
-        <ul class="features-list">
-          <li>Dashboard Analytics</li>
-          <li>Technician Management</li>
-          <li>Email Notifications</li>
-          <li>Real-time Updates</li>
-          <li>Professional Reports</li>
-        </ul>
+<body class="landing-page">
+  <div class="landing-container">
+    <!-- Hero Content Section -->
+    <div class="hero-content">
+      <h1 class="hero-title">MangoTango<br>Admin System</h1>
+      <p class="hero-subtitle">
+        Professional admin dashboard for managing technicians, analytics, and system operations with real-time insights.
+      </p>
+      
+      <div class="features-grid">
+        <div class="feature-item">Dashboard Analytics</div>
+        <div class="feature-item">Technician Management</div>
+        <div class="feature-item">Email Notifications</div>
+        <div class="feature-item">Real-time Updates</div>
+        <div class="feature-item">Professional Reports</div>
+        <div class="feature-item">System Monitoring</div>
+      </div>
+      
+      <a href="admin-login.html" class="get-started-btn">
+        🚀 Access Admin Dashboard
+      </a>
+    </div>
+    
+    <!-- Admin Panel Preview -->
+    <div class="admin-panel">
+      <img src="images/mango.png" class="admin-logo" alt="MangoTango Logo">
+      <h2 class="admin-panel-title">Admin Control Center</h2>
+      <p class="admin-panel-subtitle">Secure administrative access</p>
+      
+      <div class="login-preview">
+        <p><strong>Admin Login:</strong></p>
+        <p>📧 mangotangodev.ph@gmail.com</p>
+        <p>🔐 Secure authentication required</p>
+      </div>
+      
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-number">24/7</div>
+          <div class="stat-label">Monitoring</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Secure</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">Real-time</div>
+          <div class="stat-label">Updates</div>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Remove auto-redirect since we now have a button
-    // User can choose when to proceed
-    console.log('🎯 MangoTango Admin System Ready');
+    console.log('🎯 MangoTango Admin System - Website Version Ready');
     console.log('📧 Admin Login: mangotangodev.ph@gmail.com');
+    console.log('🔗 Dashboard URL: admin-login.html');
   </script>
 </body>
 </html>
