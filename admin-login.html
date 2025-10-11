@@ -137,11 +137,15 @@
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
     
+    .checkbox-wrapper {
+      margin-bottom: 25px;
+      width: 100%;
+    }
+    
     .checkbox-container {
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      margin-bottom: 25px;
       width: 100%;
       text-align: left;
       margin-left: 0;
@@ -263,9 +267,11 @@
           <input type="password" id="password" placeholder="Enter your password" required>
         </div>
         
-        <div class="checkbox-container">
-          <input type="checkbox" id="remember" checked>
-          <label for="remember">Remember me</label>
+        <div class="checkbox-wrapper">
+          <div class="checkbox-container">
+            <input type="checkbox" id="remember" checked>
+            <label for="remember">Remember me</label>
+          </div>
         </div>
         
         <button type="submit" class="login-button">
