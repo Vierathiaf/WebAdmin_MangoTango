@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Approval</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <a href="admin-profile.html" class="admin-info" style="text-decoration: none; color: inherit; cursor: pointer;">
+        <img src="images/profile.png" alt="Profile" class="icon">
+        <span>MangoTango Admin</span>
+      </a>
+
+      <a href="dashboard.html" class="sidebar-link">
+        <img src="images/home.png" alt="Dashboard" class="icon">
+        <span>Dashboard</span>
+      </a>
+
+      <a href="pending.html" class="sidebar-link">
+        <img src="images/users.png" alt="Registered Accounts" class="icon">
+        <span>Pending Accounts</span>
+      </a>
+
+      <a href="approval.html" class="sidebar-link">
+        <img src="images/approve.png" alt="Account Approval Panel" class="icon">
+        <span>Account Approval Panel</span>
+      </a>
+
+      <a href="admin-login.html" class="sidebar-link logout-link">
+        <img src="images/logout-ic.png" alt="Logout" class="icon">
+        <span>Logout</span>
+      </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+      <div class="content-header">
+        <h1>Account Approval</h1>
+        <div class="notif-container">
+          <button class="notif-bell" aria-label="Notifications">🔔
+            <span class="notif-badge" hidden>0</span>
+          </button>
+          <div class="notif-panel" hidden>
+            <div class="notif-header">Notifications</div>
+            <ul class="notif-list"></ul>
+          </div>
+        </div>
+      </div>
+      <p class="subtitle">Review and manage new technician registrations.</p>
+
+      <div class="stats">
+        <div class="card">
+          <h3>Approved Technician</h3>
+          <p class="number" id="approvedExperts">0</p>
+        </div>
+        <div class="card">
+          <h3>Pending Technician</h3>
+          <p class="number" id="pendingExperts">0</p>
+        </div>
+      </div>
+
+      <h3>Technician Accounts</h3>
+      <table class="approval-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Expertise</th>
+            <th>Application Date</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="firebase-email-service.js"></script>
+
+  <script type="module">
+    import { db, auth } from "./firebase-config.js";
+    import { collection, onSnapshot, doc, updateDoc, getDoc } 
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { signOut, onAuthStateChanged } 
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { initNotifications } from "./notifications.js";
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user || user.email !== "mangotangodev.ph@gmail.com") {
+        window.location.href = "admin-login.html";
+      }
+    });
+
+    document.querySelector(".logout-link").addEventListener("click", async (e) => {
+      e.preventDefault();
+      await signOut(auth);
+      window.location.replace("admin-login.html");
+    });
+
+    function loadExperts() {
+      const expertsTable = document.querySelector(".approval-table tbody");
+      const expertsRef = collection(db, "technician");
+
+      onSnapshot(expertsRef, (snapshot) => {
+        console.log("Approval: Received snapshot with", snapshot.size, "documents");
+        expertsTable.innerHTML = "";
+        let approved = 0, pending = 0;
+
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          console.log("Approval: Document data:", data);
+          let status = "Pending";
+          if (data.status === "Approved") status = "Approved";
+          else if (data.status === "Rejected") status = "Rejected";
+
+          if (status === "Approved") approved++;
+          if (status === "Pending") pending++;
+
+          expertsTable.innerHTML += `
+            <tr class="expert-row" data-id="${docSnap.id}" style="cursor: pointer;">
+              <td>${data.firstName || ""} ${data.lastName || ""}</td>
+              <td>${data.expertise || "-"}</td>
+              <td>${data.registrationDate || "-"}</td>
+              <td><span class="status ${status.toLowerCase()}">${status}</span></td>
+              <td>
+                ${status === "Pending" ? `
+                  <button class="approve-btn" data-id="${docSnap.id}">Approve</button>
+                  <button class="reject-btn" data-id="${docSnap.id}">Reject</button>
+                ` : ""}
+              </td>
+            </tr>
+          `;
+        });
+
+        console.log("Approval: Counts - Approved:", approved, "Pending:", pending);
+        document.getElementById("approvedExperts").innerText = approved;
+        document.getElementById("pendingExperts").innerText = pending;
+
+        document.querySelectorAll(".expert-row").forEach(row => {
+          row.addEventListener("click", (e) => {
+            if (e.target.tagName === 'BUTTON') return;
+            const id = row.getAttribute("data-id");
+            window.location.href = `register.html?id=${id}`;
+          });
+        });
+
+        document.querySelectorAll(".approve-btn").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            updateStatus(btn.dataset.id, "Approved");
+          });
+        });
+        document.querySelectorAll(".reject-btn").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            updateStatus(btn.dataset.id, "Rejected");
+          });
+        });
+      }, (error) => {
+        console.error("Approval: Error fetching data:", error);
+      });
+    }
+
+    async function updateStatus(docId, newStatus) {
+      try {
+        console.log('🔍 Fetching technician data for docId:', docId);
+        const technicianDoc = await getDoc(doc(db, "technician", docId));
+        
+        if (!technicianDoc.exists()) {
+          console.error('❌ Technician document not found for docId:', docId);
+          showNotification('Error: Technician not found', 'error');
+          return;
+        }
+        
+        const technicianData = technicianDoc.data();
+        console.log('📄 Fetched technician data:', technicianData);
+        console.log('📧 Email address found:', technicianData.email);
+        console.log('👤 Name found:', technicianData.firstName, technicianData.lastName);
+        
+        const updateData = { 
+          status: newStatus,
+          updatedAt: new Date().toISOString(),
+          updatedBy: "mangotangodev.ph@gmail.com"
+        };
+        
+        await updateDoc(doc(db, "technician", docId), updateData);
+        console.log('✅ Database updated successfully');
+        
+        if (newStatus === "Approved") {
+          try {
+            // Show immediate approval notification
+            showNotification(`✅ Technician ${technicianData.firstName} ${technicianData.lastName} approved successfully!`, 'success');
+            
+            // Validate email data before sending
+            if (!technicianData.email) {
+              console.error('❌ No email address found in technician data');
+              showNotification('Error: No email address found for technician', 'error');
+              return;
+            }
+            
+            console.log('📧 Attempting to send approval email to:', technicianData.email);
+            
+            // Send detailed approval email with login instructions
+            const emailSent = await window.EmailService.sendApprovalEmailWithInstructions(technicianData);
+            
+            if (emailSent) {
+              // Show success notification for email
+              setTimeout(() => {
+                window.EmailService.showEmailNotification(
+                  `📧 Approval email with login instructions sent to ${technicianData.email}`, 
+                  'success'
+                );
+              }, 1000);
+            } else {
+              // Show warning if email failed
+              setTimeout(() => {
+                window.EmailService.showEmailNotification(
+                  `⚠️ Technician approved but email failed to send to ${technicianData.email}`, 
+                  'warning'
+                );
+              }, 1000);
+            }
+          } catch (emailError) {
+            console.error("Email sending error:", emailError);
+            setTimeout(() => {
+              window.EmailService.showEmailNotification(
+                `❌ Email sending failed: ${emailError.message}`, 
+                'error'
+              );
+            }, 1000);
+          }
+        } else if (newStatus === "Rejected") {
+          try {
+            const emailSent = await window.EmailService.sendRejectionEmail(technicianData);
+            if (emailSent) {
+              showNotification(`Technician rejected and email sent successfully!`, 'success');
+            } else {
+              showNotification(`Technician rejected but email failed to send.`, 'warning');
+            }
+          } catch (emailError) {
+            console.error("Email sending error:", emailError);
+            showNotification(`Technician rejected but email failed to send.`, 'warning');
+          }
+        } else {
+          showNotification(`Technician ${newStatus.toLowerCase()} successfully!`, 'success');
+        }
+      } catch (err) {
+        console.error("Error updating status:", err);
+        showNotification(`Error updating status: ${err.message}`, 'error');
+      }
+    }
+
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.innerHTML = `
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()">×</button>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        if (notification.parentElement) {
+          notification.remove();
+        }
+      }, 5000);
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      await Promise.all([loadExperts(), initNotifications(db)]);
+    });
+
+    window.addEventListener('popstate', () => {
+      if (!auth.currentUser) {
+        window.location.replace('admin-login.html');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MangoTango - Admin Login</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="login-page">
+  <div class="container">
+    <div class="login-box">
+      <img src="images/mango.png" class="Logo" alt="MangoTango Logo">
+      <h2>🔐 Admin Access Portal</h2>
+      <p style="text-align: center; color: #718096; margin-bottom: 25px;">MangoTango Development Administration</p>
+
+      <form id="loginForm">
+        <label class="fillup" for="email">Email</label>
+        <input type="email" id="email" placeholder="mangotangodev.ph@gmail.com" value="mangotangodev.ph@gmail.com" required>
+
+        <label class="fillup" for="password">Password</label>
+        <input type="password" id="password" placeholder="admin@mangotango2025" required>
+
+        <div class="remember-me">
+          <input type="checkbox" id="remember" checked>
+          <label for="remember">Remember me</label>
+        </div>
+
+        <button class="submit" type="submit">Log in</button>
+        <a href="forgot.html" class="forgot">Forgot password?</a>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth } from "./firebase-config.js";
+    import { signInWithEmailAndPassword, onAuthStateChanged, createUserWithEmailAndPassword } 
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const loginForm = document.getElementById("loginForm");
+
+    onAuthStateChanged(auth, (user) => {
+      if (user && user.email === "mangotangodev.ph@gmail.com") {
+        window.location.href = "dashboard.html";
+      }
+    });
+
+    async function ensureAdminExists() {
+      try {
+        await createUserWithEmailAndPassword(auth, "mangotangodev.ph@gmail.com", "admin@mangotango2025");
+        console.log("Admin account created successfully");
+      } catch (error) {
+        if (error.code === 'auth/email-already-in-use') {
+          console.log("Admin account already exists");
+        } else {
+          console.error("Error creating admin account:", error);
+        }
+      }
+    }
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      if (email !== "mangotangodev.ph@gmail.com" || password !== "admin@mangotango2025") {
+        alert("❌ Invalid credentials. Admin access only.");
+        return;
+      }
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert("✅ Login successful!");
+        window.location.href = "dashboard.html";
+      } catch (error) {
+        if (error.code === 'auth/user-not-found') {
+          await ensureAdminExists();
+          try {
+            await signInWithEmailAndPassword(auth, email, password);
+            alert("✅ Login successful!");
+            window.location.href = "dashboard.html";
+          } catch (retryError) {
+            alert("❌ Login failed: " + retryError.message);
+          }
+        } else {
+          alert("❌ Login failed: " + error.message);
+        }
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', ensureAdminExists);
+  </script>
+</body>
+</html>

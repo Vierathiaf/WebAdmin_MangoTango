@@ -1,0 +1,29 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Setup Admin Account",
+            "file": "e:\\Audissey_ADMIN\\MangoTango-Admin--main\\setup-admin.html",
+            "url": "http://localhost:8000/setup-admin.html"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Admin Login",
+            "file": "e:\\Audissey_ADMIN\\MangoTango-Admin--main\\admin-login.html",
+            "url": "http://localhost:8000/admin-login.html"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Admin Dashboard",
+            "file": "e:\\Audissey_ADMIN\\MangoTango-Admin--main\\dashboard.html",
+            "url": "http://localhost:8000/dashboard.html"
+        }
+    ]
+}

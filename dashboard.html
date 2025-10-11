@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <a href="admin-profile.html" class="admin-info" style="text-decoration: none; color: inherit; cursor: pointer;">
+        <img src="images/profile.png" alt="Profile" class="icon">
+        <span>MangoTango Admin</span>
+      </a>
+
+      <a href="dashboard.html" class="sidebar-link">
+        <img src="images/home.png" alt="Dashboard" class="icon">
+        <span>Dashboard</span>
+      </a>
+
+      <a href="pending.html" class="sidebar-link">
+        <img src="images/users.png" alt="Registered Accounts" class="icon">
+        <span>Pending Accounts</span>
+      </a>
+
+      <a href="approval.html" class="sidebar-link">
+        <img src="images/approve.png" alt="Account Approval Panel" class="icon">
+        <span>Account Approval Panel</span>
+      </a>
+
+      <a href="admin-login.html" class="sidebar-link logout-link">
+        <img src="images/logout-ic.png" alt="Logout" class="icon">
+        <span>Logout</span>
+      </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+      <div class="content-header">
+        <h1>Dashboard</h1>
+        <div class="notif-container">
+          <button class="notif-bell" aria-label="Notifications">🔔
+            <span class="notif-badge" hidden>0</span>
+          </button>
+          <div class="notif-panel" hidden>
+            <div class="notif-header">Notifications</div>
+            <ul class="notif-list"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="card">
+          <div class="card-icon">👥</div>
+          <h3>Registered Technicians</h3>
+          <p class="number" id="registeredCount">0</p>
+          <small>Active technicians in system</small>
+        </div>
+        <a href="approval.html" class="card">
+          <div class="card-icon">⏳</div>
+          <h3>Pending Approvals</h3>
+          <p class="number" id="pendingCount">0</p>
+          <small>Awaiting admin review</small>
+        </a>
+      </div>
+
+      <!-- Enhanced Analytics Dashboard -->
+      <div class="analytics-section">
+        <div class="analytics-header">
+          <h2>📈 Analytics Dashboard</h2>
+          <div class="analytics-controls">
+            <select id="timeRange" class="time-selector">
+              <option value="7">Last 7 Days</option>
+              <option value="30" selected>Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="analytics-grid">
+          <!-- Registration trends Chart -->
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3>🚀 Registration Trends</h3>
+              <span class="chart-subtitle">Daily new technician registrations</span>
+            </div>
+            <canvas id="registrationsChart"></canvas>
+            <div class="chart-stats">
+              <div class="stat-item">
+                <span class="stat-value" id="totalRegistrations">0</span>
+                <span class="stat-label">Total Registrations</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value" id="avgDaily">0</span>
+                <span class="stat-label">Daily Average</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Distribution Chart -->
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3>📊 Status Distribution</h3>
+              <span class="chart-subtitle">Approval status breakdown</span>
+            </div>
+            <canvas id="statusChart"></canvas>
+            <div class="status-legend">
+              <div class="legend-item">
+                <span class="legend-color approved"></span>
+                <span>Approved</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color pending"></span>
+                <span>Pending</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color rejected"></span>
+                <span>Rejected</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity Timeline -->
+          <div class="chart-container full-width">
+            <div class="chart-header">
+              <h3>⚡ Recent Activity</h3>
+              <span class="chart-subtitle">Latest admin actions and registrations</span>
+            </div>
+            <div class="activity-timeline" id="activityTimeline">
+              <div class="activity-item">
+                <div class="activity-icon approved">✅</div>
+                <div class="activity-content">
+                  <div class="activity-title">Technician Approved</div>
+                  <div class="activity-desc">John Doe - Electrical Technician</div>
+                  <div class="activity-time">2 hours ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon pending">⏳</div>
+                <div class="activity-content">
+                  <div class="activity-title">New Registration</div>
+                  <div class="activity-desc">Jane Smith - HVAC Technician</div>
+                  <div class="activity-time">4 hours ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon approved">✅</div>
+                <div class="activity-content">
+                  <div class="activity-title">Technician Approved</div>
+                  <div class="activity-desc">Mike Johnson - Plumbing Technician</div>
+                  <div class="activity-time">1 day ago</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script type="module">
+    import { db, auth } from "./firebase-config.js";
+    import { collection, onSnapshot }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { signOut, onAuthStateChanged } 
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { initNotifications } from "./notifications.js";
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user || user.email !== "mangotangodev.ph@gmail.com") {
+        window.location.href = "admin-login.html";
+      }
+    });
+
+    document.querySelector(".logout-link").addEventListener("click", async (e) => {
+      e.preventDefault();
+      await signOut(auth);
+      window.location.replace("admin-login.html");
+    });
+
+    function loadStats() {
+      const expertsRef = collection(db, "technician");
+
+      onSnapshot(expertsRef, (snapshot) => {
+        console.log("Dashboard: Received snapshot with", snapshot.size, "documents");
+        let approvedCount = 0;
+        let pendingCount = 0;
+        const monthCounts = {};
+
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          console.log("Dashboard: Document data:", data);
+          if (data.status === "Approved") {
+            approvedCount++;
+          }
+          if (data.status === "Pending") {
+            pendingCount++;
+          }
+
+          let dateObj = null;
+          if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+            dateObj = data.createdAt.toDate();
+          } else if (data.registrationDate) {
+            const parts = String(data.registrationDate).split('-');
+            if (parts.length === 3) {
+              dateObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+            }
+          }
+          if (dateObj) {
+            const month = dateObj.toLocaleString("default", { month: "short" });
+            monthCounts[month] = (monthCounts[month] || 0) + 1;
+          }
+        });
+
+        console.log("Dashboard: Counts - Approved:", approvedCount, "Pending:", pendingCount);
+        document.getElementById("registeredCount").textContent = approvedCount;
+        document.getElementById("pendingCount").textContent = pendingCount;
+
+        const labels = Object.keys(monthCounts);
+        const dataPoints = Object.values(monthCounts);
+        const totalRegistrations = approvedCount + pendingCount;
+        
+        renderRegistrationsChart(labels, dataPoints);
+        renderStatusChart(approvedCount, pendingCount);
+        updateAnalyticsStats(approvedCount, pendingCount, totalRegistrations);
+      }, (error) => {
+        console.error("Dashboard: Error fetching data:", error);
+      });
+    }
+
+    let registrationsChart = null;
+    let statusChart = null;
+
+    function renderRegistrationsChart(labels, dataPoints) {
+      const ctx = document.getElementById('registrationsChart').getContext('2d');
+      
+      if (registrationsChart) {
+        registrationsChart.destroy();
+      }
+      
+      registrationsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'New Registrations',
+            data: dataPoints,
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#667eea',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            pointHoverBackgroundColor: '#764ba2',
+            pointHoverBorderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { 
+            legend: { 
+              display: false
+            },
+            tooltip: {
+              backgroundColor: 'rgba(102, 126, 234, 0.9)',
+              titleColor: '#ffffff',
+              bodyColor: '#ffffff',
+              borderColor: '#667eea',
+              borderWidth: 1,
+              cornerRadius: 8,
+              displayColors: false
+            }
+          },
+          scales: {
+            y: { 
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(102, 126, 234, 0.1)',
+                drawBorder: false
+              },
+              ticks: {
+                color: '#718096',
+                font: {
+                  family: 'Segoe UI, sans-serif',
+                  size: 12
+                },
+                padding: 10
+              }
+            },
+            x: { 
+              grid: { 
+                display: false,
+                drawBorder: false
+              },
+              ticks: {
+                color: '#718096',
+                font: {
+                  family: 'Segoe UI, sans-serif',
+                  size: 12
+                },
+                padding: 10
+              }
+            }
+          },
+          elements: {
+            point: {
+              hoverRadius: 8
+            }
+          }
+        }
+      });
+    }
+
+    function renderStatusChart(approvedCount, pendingCount, rejectedCount = 0) {
+      const ctx = document.getElementById('statusChart').getContext('2d');
+      
+      if (statusChart) {
+        statusChart.destroy();
+      }
+      
+      statusChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Approved', 'Pending', 'Rejected'],
+          datasets: [{
+            data: [approvedCount, pendingCount, rejectedCount],
+            backgroundColor: [
+              '#48bb78',
+              '#ed8936', 
+              '#f56565'
+            ],
+            hoverBackgroundColor: [
+              '#38a169',
+              '#dd6b20',
+              '#e53e3e'
+            ],
+            borderWidth: 0,
+            hoverOffset: 10
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: 'rgba(45, 55, 72, 0.9)',
+              titleColor: '#ffffff',
+              bodyColor: '#ffffff',
+              borderColor: '#667eea',
+              borderWidth: 1,
+              cornerRadius: 8,
+              callbacks: {
+                label: function(context) {
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = ((context.parsed / total) * 100).toFixed(1);
+                  return `${context.label}: ${context.parsed} (${percentage}%)`;
+                }
+              }
+            }
+          },
+          cutout: '60%'
+        }
+      });
+    }
+
+    function updateAnalyticsStats(approvedCount, pendingCount, totalRegistrations) {
+      document.getElementById('totalRegistrations').textContent = totalRegistrations;
+      document.getElementById('avgDaily').textContent = Math.round(totalRegistrations / 30);
+    }
+
+    // Test function to verify Firestore data fetching
+    async function testFirestoreData() {
+      try {
+        console.log('🔍 Testing Firestore data fetching...');
+        
+        const { collection, getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        const technicianRef = collection(db, "technician");
+        const snapshot = await getDocs(technicianRef);
+        
+        console.log(`📊 Found ${snapshot.size} technician records in Firestore`);
+        
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          console.log(`👤 Technician ID: ${doc.id}`);
+          console.log(`📧 Email: ${data.email || 'NO EMAIL'}`);
+          console.log(`👤 Name: ${data.firstName || 'NO FIRST NAME'} ${data.lastName || 'NO LAST NAME'}`);
+          console.log(`📋 Status: ${data.status || 'NO STATUS'}`);
+          console.log(`🔧 Expertise: ${data.expertise || 'NO EXPERTISE'}`);
+          console.log('📄 Full data:', data);
+          console.log('---');
+        });
+        
+        return snapshot.size;
+        
+      } catch (error) {
+        console.error('❌ Error testing Firestore data:', error);
+        return 0;
+      }
+    }
+    
+    // Make test function globally available
+    window.testFirestoreData = testFirestoreData;
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      onAuthStateChanged(auth, async (user) => {
+        if (user && user.email === "mangotangodev.ph@gmail.com") {
+          await Promise.all([loadStats(), initNotifications(db)]);
+        }
+      });
+    });
+
+    window.addEventListener('popstate', () => {
+      if (!auth.currentUser) {
+        window.location.replace('admin-login.html');
+      }
+    });
+  </script>
+</body>
+</html>

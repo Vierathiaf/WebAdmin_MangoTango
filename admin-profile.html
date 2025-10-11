@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Profile</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <a href="admin-profile.html" class="admin-info" style="text-decoration: none; color: inherit; cursor: pointer;">
+        <img src="images/profile.png" alt="Profile" class="icon">
+        <span>MangoTango Admin</span>
+      </a>
+
+      <a href="dashboard.html" class="sidebar-link">
+        <img src="images/home.png" alt="Dashboard" class="icon">
+        <span>Dashboard</span>
+      </a>
+
+      <a href="pending.html" class="sidebar-link">
+        <img src="images/users.png" alt="Registered Accounts" class="icon">
+        <span>Pending Accounts</span>
+      </a>
+
+      <a href="approval.html" class="sidebar-link">
+        <img src="images/approve.png" alt="Account Approval Panel" class="icon">
+        <span>Account Approval Panel</span>
+      </a>
+
+      <a href="admin-login.html" class="sidebar-link logout-link">
+        <img src="images/logout-ic.png" alt="Logout" class="icon">
+        <span>Logout</span>
+      </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+      <div class="content-header">
+        <h1>Admin Profile</h1>
+        <div class="notif-container">
+          <button class="notif-bell" aria-label="Notifications">🔔
+            <span class="notif-badge" hidden>0</span>
+          </button>
+          <div class="notif-panel" hidden>
+            <div class="notif-header">Notifications</div>
+            <ul class="notif-list"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-card">
+        <div class="profile-header">
+          <img src="images/profile.png" alt="Admin Photo" class="profile-pic">
+          <h2 id="adminName">MangoTango Administrator</h2>
+          <p class="role" id="adminRole">System Administrator</p>
+        </div>
+        
+        <div class="profile-info">
+          <h3>📧 Contact Information</h3>
+          <p><strong>Email:</strong> <span id="adminEmail">mangotangodev.ph@gmail.com</span></p>
+          <p><strong>Phone:</strong> <span id="adminPhone">+63 917 123 4567</span></p>
+          <p><strong>Address:</strong> <span id="adminAddress">MangoTango Development Office, Philippines</span></p>
+        </div>
+
+        <div class="profile-info">
+          <h3>👤 Account Details</h3>
+          <p><strong>Username:</strong> <span id="adminUsername">mangotangodev</span></p>
+          <p><strong>Role:</strong> <span id="adminRole2">System Administrator</span></p>
+          <p><strong>Access Level:</strong> <span style="color: #e53e3e; font-weight: 600;">Super Administrator</span></p>
+          <p><strong>Joined:</strong> <span id="adminJoined">October 2024</span></p>
+          <p><strong>Last Login:</strong> <span id="lastLogin">Just now</span></p>
+        </div>
+
+        <div class="profile-info">
+          <h3>🏢 Organization Details</h3>
+          <p><strong>Company:</strong> <span>MangoTango Development</span></p>
+          <p><strong>Department:</strong> <span>IT Administration</span></p>
+          <p><strong>Employee ID:</strong> <span>MT-ADMIN-001</span></p>
+          <p><strong>Status:</strong> <span style="color: #38a169; font-weight: 600;">Active</span></p>
+        </div>
+
+        <div class="profile-actions">
+          <button id="editBtn" class="approve">Edit Profile</button>
+          <button id="saveBtn" class="approve" style="display:none;">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { initNotifications } from "./notifications.js";
+
+    const fields = {
+      name: document.getElementById("adminName"),
+      role: document.getElementById("adminRole"),
+      email: document.getElementById("adminEmail"),
+      phone: document.getElementById("adminPhone"),
+      address: document.getElementById("adminAddress"),
+      username: document.getElementById("adminUsername"),
+      role2: document.getElementById("adminRole2"),
+      joined: document.getElementById("adminJoined"),
+    };
+
+    // Set current login time
+    document.getElementById("lastLogin").textContent = new Date().toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const editBtn = document.getElementById("editBtn");
+    const saveBtn = document.getElementById("saveBtn");
+
+    let adminRef = null;
+
+    function loadProfileFromStorage() {
+      try {
+        const savedProfile = localStorage.getItem('adminProfile');
+        if (savedProfile) {
+          const profileData = JSON.parse(savedProfile);
+          
+          // Update fields with saved data
+          Object.keys(profileData).forEach(key => {
+            if (fields[key]) {
+              fields[key].textContent = profileData[key];
+            }
+          });
+          
+          // Update role2 field as well
+          if (fields.role2 && profileData.role) {
+            fields.role2.textContent = profileData.role;
+          }
+          
+          console.log('Admin profile loaded from localStorage');
+        }
+      } catch (error) {
+        console.error('Error loading profile from storage:', error);
+      }
+    }
+
+    async function loadProfile() {
+      // Profile data is now static, no need to load from database
+      // Data is already set in the HTML
+      console.log('Admin profile loaded with static data');
+    }
+
+    function makeEditable() {
+      Object.values(fields).forEach(el => {
+        const text = el.textContent;
+        el.innerHTML = `<input type="text" value="${text}">`;
+      });
+      editBtn.style.display = "none";
+      saveBtn.style.display = "inline-block";
+    }
+
+    async function saveProfile() {
+      try {
+        // Get updated values from input fields
+        const updatedData = {
+          name: fields.name.querySelector("input").value,
+          role: fields.role.querySelector("input").value,
+          email: fields.email.querySelector("input").value,
+          phone: fields.phone.querySelector("input").value,
+          address: fields.address.querySelector("input").value,
+          username: fields.username.querySelector("input").value,
+          joined: fields.joined.querySelector("input").value,
+        };
+
+        // Update the display with new values
+        Object.keys(updatedData).forEach(key => {
+          if (fields[key]) {
+            fields[key].textContent = updatedData[key];
+          }
+        });
+
+        // Update role2 field as well (it mirrors the role)
+        if (fields.role2) {
+          fields.role2.textContent = updatedData.role;
+        }
+
+        // Optional: Save to localStorage for persistence
+        localStorage.setItem('adminProfile', JSON.stringify(updatedData));
+
+        // Show success message
+        alert("✅ Profile updated successfully!");
+
+        // Switch back to view mode
+        editBtn.style.display = "inline-block";
+        saveBtn.style.display = "none";
+
+      } catch (error) {
+        console.error('Error saving profile:', error);
+        alert("❌ Error saving profile: " + error.message);
+      }
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user || user.email !== "mangotangodev.ph@gmail.com") {
+        window.location.href = "admin-login.html";
+      } else {
+        // Load any saved profile data from localStorage
+        loadProfileFromStorage();
+        loadProfile();
+      }
+    });
+
+    document.querySelector(".logout-link").addEventListener("click", async (e) => {
+      e.preventDefault();
+      await signOut(auth);
+      window.location.replace("admin-login.html");
+    });
+
+    editBtn.addEventListener("click", makeEditable);
+    saveBtn.addEventListener("click", saveProfile);
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      await initNotifications(db);
+    });
+
+    window.addEventListener('popstate', () => {
+      if (!auth.currentUser) {
+        window.location.replace('admin-login.html');
+      }
+    });
+  </script>
+</body>
+</html>

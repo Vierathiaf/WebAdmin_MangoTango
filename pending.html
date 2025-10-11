@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pending Accounts</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <a href="admin-profile.html" class="admin-info" style="text-decoration: none; color: inherit; cursor: pointer;">
+        <img src="images/profile.png" alt="Profile" class="icon">
+        <span>MangoTango Admin</span>
+      </a>
+
+      <a href="dashboard.html" class="sidebar-link">
+        <img src="images/home.png" alt="Dashboard" class="icon">
+        <span>Dashboard</span>
+      </a>
+
+      <a href="pending.html" class="sidebar-link">
+        <img src="images/users.png" alt="Registered Accounts" class="icon">
+        <span>Pending Accounts</span>
+      </a>
+
+      <a href="approval.html" class="sidebar-link">
+        <img src="images/approve.png" alt="Account Approval Panel" class="icon">
+        <span>Account Approval Panel</span>
+      </a>
+
+      <a href="admin-login.html" class="sidebar-link logout-link">
+        <img src="images/logout-ic.png" alt="Logout" class="icon">
+        <span>Logout</span>
+      </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+      <div class="content-header">
+        <h1>Technician Accounts</h1>
+        <div class="notif-container">
+          <button class="notif-bell" aria-label="Notifications">🔔
+            <span class="notif-badge" hidden>0</span>
+          </button>
+          <div class="notif-panel" hidden>
+            <div class="notif-header">Notifications</div>
+            <ul class="notif-list"></ul>
+          </div>
+        </div>
+      </div>
+      <p>Review and manage new technician registrations.</p>
+
+      <div class="stats">
+        <div class="card">
+          <h3>Pending Accounts</h3>
+          <p id="pending-count" class="number">0</p>
+        </div>
+        <div class="card">
+          <h3>New Applications Today</h3>
+          <p id="new-today" class="number">0</p>
+        </div>
+        <div class="card">
+          <h3>Registered Technicians</h3>
+          <p id="registered-count" class="number">0</p>
+        </div>
+      </div>
+
+      <h3>Pending Accounts</h3>
+      <div class="pending-accounts">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Expertise</th>
+              <th>Application Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="pending-table-body">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { db, auth } from "./firebase-config.js";
+    import { collection, onSnapshot, addDoc, query, where, serverTimestamp, getDocs } 
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { signOut, onAuthStateChanged } 
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { initNotifications } from "./notifications.js";
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user || user.email !== "mangotangodev.ph@gmail.com") {
+        window.location.href = "admin-login.html";
+      }
+    });
+
+    document.querySelector(".logout-link").addEventListener("click", async (e) => {
+      e.preventDefault();
+      await signOut(auth);
+      window.location.replace("admin-login.html");
+    });
+
+    async function handleIncomingSubmission() {
+      const params = new URLSearchParams(window.location.search);
+      const hasIncoming = params.get("submit") === "1";
+      if (!hasIncoming) return;
+
+      const firstName = params.get("firstName") || "";
+      const lastName = params.get("lastName") || "";
+      const email = params.get("email") || "";
+      const expertise = params.get("expertise") || "";
+      const address = params.get("address") || "";
+      const certificateUrl = params.get("certificateUrl") || "";
+      const providedDate = params.get("registrationDate") || "";
+
+      if (!firstName && !lastName && !email) return;
+
+      const today = new Date().toISOString().split("T")[0];
+      const registrationDate = providedDate || today;
+
+      try {
+        const dupQuery = query(
+          collection(db, "technician"),
+          where("email", "==", email),
+          where("registrationDate", "==", registrationDate)
+        );
+        const dupSnap = await getDocs(dupQuery);
+        if (dupSnap.empty) {
+          await addDoc(collection(db, "technician"), {
+            firstName,
+            lastName,
+            email,
+            expertise,
+            address,
+            certificateUrl,
+            registrationDate,
+            status: "Pending",
+            createdAt: serverTimestamp()
+          });
+        }
+      } catch (e) {
+        console.error("Error saving external registration:", e);
+      } finally {
+        const url = new URL(window.location.href);
+        url.search = "";
+        window.history.replaceState({}, document.title, url.toString());
+      }
+    }
+
+    function loadExperts() {
+      const tableBody = document.getElementById("pending-table-body");
+      const expertsRef = collection(db, "technician");
+
+      onSnapshot(expertsRef, (snapshot) => {
+        console.log("Pending: Received snapshot with", snapshot.size, "documents");
+        tableBody.innerHTML = "";
+        let pendingCount = 0, registeredCount = 0, newToday = 0;
+        const today = new Date().toISOString().split("T")[0];
+
+        snapshot.forEach((doc) => {
+          const expert = doc.data();
+          console.log("Pending: Document data:", expert);
+          let status = "Pending";
+          if (expert.status === "Approved") status = "Approved";
+          else if (expert.status === "Rejected") status = "Rejected";
+
+          if (status === "Pending") {
+            pendingCount++;
+            if (expert.registrationDate === today) {
+              newToday++;
+            }
+
+            tableBody.innerHTML += `
+              <tr>
+                <td>${expert.firstName || ""} ${expert.lastName || ""}</td>
+                <td>${expert.expertise || ""}</td>
+                <td>${expert.registrationDate || "N/A"}</td>
+                <td><a href="register.html?id=${doc.id}" class="view-link">View Registration</a></td>
+              </tr>
+            `;
+          }
+
+          if (status === "Approved") {
+            registeredCount++;
+          }
+        });
+
+        console.log("Pending: Counts - Pending:", pendingCount, "Registered:", registeredCount, "New Today:", newToday);
+        document.getElementById("pending-count").textContent = pendingCount;
+        document.getElementById("new-today").textContent = newToday;
+        document.getElementById("registered-count").textContent = registeredCount;
+      }, (error) => {
+        console.error("Pending: Error fetching data:", error);
+      });
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      await handleIncomingSubmission();
+      await Promise.all([loadExperts(), initNotifications(db)]);
+    });
+
+    window.addEventListener('popstate', () => {
+      if (!auth.currentUser) {
+        window.location.replace('admin-login.html');
+      }
+    });
+  </script>
+</body>
+</html>

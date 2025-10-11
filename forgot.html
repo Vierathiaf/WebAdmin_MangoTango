@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forgot Password</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="login-page">
+  <div class="container">
+    <div class="login-box">
+      <img src="images/mango.png" class="Logo" alt="MangoTango Logo">
+      <h2>Forgot Password</h2>
+
+      <p class="reset-label">
+        Enter your email address below and we'll send you a secure link to reset your password.
+      </p>
+
+      <form id="forgotForm">
+        <label class="fillup" for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter your email" required>
+
+        <button type="submit" class="submit">Send Reset Link</button>
+        <a href="admin-login.html" class="forgot">Back to login</a>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth } from "./firebase-config.js";
+    import { sendPasswordResetEmail } 
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const forgotForm = document.getElementById("forgotForm");
+
+    forgotForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value;
+
+      try {
+        await sendPasswordResetEmail(auth, email);
+        alert("A password reset link has been sent to your email ✅");
+        window.location.href = "admin-login.html";
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    });
+  </script>
+</body>
+</html>
