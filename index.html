@@ -5,18 +5,100 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MangoTango Admin System</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .welcome-container {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    
+    .welcome-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #2d3748;
+      margin: 20px 0 10px 0;
+    }
+    
+    .welcome-subtitle {
+      font-size: 16px;
+      color: #718096;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+    
+    .get-started-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 10px;
+    }
+    
+    .get-started-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    }
+    
+    .features-list {
+      text-align: left;
+      max-width: 300px;
+      margin: 30px auto 0;
+      color: #4a5568;
+    }
+    
+    .features-list li {
+      margin: 8px 0;
+      padding-left: 20px;
+      position: relative;
+    }
+    
+    .features-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #48bb78;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body class="login-page">
   <div class="container">
     <div class="login-box">
-      <img src="images/mango.png" class="Logo" alt="MangoTango Logo">
-      <h2>MangoTango Admin System</h2>
-      
+      <div class="welcome-container">
+        <img src="images/mango.png" class="Logo" alt="MangoTango Logo">
+        <h1 class="welcome-title">MangoTango Admin System</h1>
+        <p class="welcome-subtitle">
+          Professional admin dashboard for managing technicians, analytics, and system operations.
+        </p>
+        
+        <a href="admin-login.html" class="get-started-btn">
+          🚀 Get Started
+        </a>
+        
+        <ul class="features-list">
+          <li>Dashboard Analytics</li>
+          <li>Technician Management</li>
+          <li>Email Notifications</li>
+          <li>Real-time Updates</li>
+          <li>Professional Reports</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 
   <script>
-    setTimeout(() => {
-      window.location.href = 'admin-login.html';
-    }, 5000);
+    // Remove auto-redirect since we now have a button
+    // User can choose when to proceed
+    console.log('🎯 MangoTango Admin System Ready');
+    console.log('📧 Admin Login: mangotangodev.ph@gmail.com');
   </script>
 </body>
 </html>
