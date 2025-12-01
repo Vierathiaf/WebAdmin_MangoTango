@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Technician Review</title>
   <link rel="stylesheet" href="styles.css">
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate"/>
-  <meta http-equiv="Pragma" content="no-cache"/>
-  <meta http-equiv="Expires" content="0"/>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
 </head>
+
 <body>
   <div class="layout">
     <!-- Sidebar -->
@@ -44,7 +46,12 @@
       <div class="content-header">
         <h1>Technician Review</h1>
         <div class="notif-container">
-          <button class="notif-bell" aria-label="Notifications">🔔
+          <button class="notif-bell" aria-label="Notifications">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
             <span class="notif-badge" hidden>0</span>
           </button>
           <div class="notif-panel" hidden>
@@ -55,443 +62,427 @@
       </div>
 
       <div class="container review-panel">
-    <h2>Review Technician Registration</h2>
+        <h2>Review Technician Registration</h2>
 
-    <div class="review-grid">
-      <div class="info-column">
-        <h3>Technician Details</h3>
-        <div class="info-group">
-          <label>First Name</label>
-          <div class="input-box" id="firstNameBox">Loading...</div>
-        </div>
-        <div class="info-group">
-          <label>Last Name</label>
-          <div class="input-box" id="lastNameBox">Loading...</div>
-        </div>
-        <div class="info-group">
-          <label>Email</label>
-          <div class="input-box" id="emailBox">Loading...</div>
-        </div>
-        <div class="info-group">
-          <label>Role/Expertise</label>
-          <div class="input-box" id="expertiseBox">Loading...</div>
-        </div>
-        <div class="info-group">
-          <label>Department Address</label>
-          <div class="input-box" id="addressBox">Loading...</div>
-        </div>
-      </div>
-      <div class="certificate-column">
-        <h3>Certificate</h3>
-        <div class="certificate-box">
-          <div id="certificateContainer">
-            <img id="certificatePreview" src="images/certificate.png" alt="Certificate" style="cursor:pointer; max-width: 100%; height: auto; border-radius: 8px; border: 2px solid #e5e7eb;">
-            <div id="certificateLoading" style="display: none; text-align: center; padding: 20px;">
-              <div class="loading-spinner"></div>
-              <p>Loading certificate...</p>
+        <div class="review-grid">
+          <div class="info-column">
+            <h3>Technician Details</h3>
+            <div class="info-group">
+              <label>First Name</label>
+              <div class="input-box" id="firstNameBox">Loading...</div>
             </div>
-            <div id="certificateError" style="display: none; text-align: center; padding: 20px; color: #ef4444;">
-              <p>❌ Certificate not available</p>
+            <div class="info-group">
+              <label>Last Name</label>
+              <div class="input-box" id="lastNameBox">Loading...</div>
+            </div>
+            <div class="info-group">
+              <label>Email</label>
+              <div class="input-box" id="emailBox">Loading...</div>
+            </div>
+            <div class="info-group">
+              <label>Role/Expertise</label>
+              <div class="input-box" id="expertiseBox">Loading...</div>
+            </div>
+            <div class="info-group">
+              <label>Department Address</label>
+              <div class="input-box" id="addressBox">Loading...</div>
             </div>
           </div>
-          <div class="certificate-actions" style="margin-top: 10px; display: flex; gap: 10px;">
-            <button id="viewFullScreen" class="btn-secondary" style="display: none;">🔍 View Full Screen</button>
-            <button id="downloadCertificate" class="btn-secondary" style="display: none;">📥 Download</button>
+          <div class="certificate-column">
+            <h3>Certificate</h3>
+            <div class="certificate-box">
+              <div id="certificateContainer">
+                <img id="certificatePreview" src="images/certificate.png" alt="Certificate"
+                  style="cursor:pointer; max-width: 100%; height: auto; border-radius: 8px; border: 2px solid #e5e7eb;">
+                <div id="certificateLoading" style="display: none; text-align: center; padding: 20px;">
+                  <div class="loading-spinner"></div>
+                  <p>Loading certificate...</p>
+                </div>
+                <div id="certificateError" style="display: none; text-align: center; padding: 20px; color: #ef4444;">
+                  <p>❌ Certificate not available</p>
+                </div>
+              </div>
+              <div class="certificate-actions" style="margin-top: 10px; display: flex; gap: 10px;">
+                <button id="viewFullScreen" class="btn-secondary" style="display: none;">🔍 View Full Screen</button>
+                <button id="downloadCertificate" class="btn-secondary" style="display: none;">📥 Download</button>
+              </div>
+            </div>
           </div>
+        </div>
+
+        <div class="buttons">
+          <button id="approveBtn" class="approve">✅ Approve</button>
+          <button id="rejectBtn" class="reject">❌ Reject</button>
         </div>
       </div>
     </div>
-    
-    <div class="buttons">
-        <button id="approveBtn" class="approve">✅ Approve</button>
-        <button id="rejectBtn" class="reject">❌ Reject</button>
+
+    <div id="certificateModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Certificate - Full View</h3>
+          <button class="modal-close" id="closeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <img id="modalCertificateImage" src="" alt="Certificate Full View"
+            style="max-width: 100%; max-height: 80vh; object-fit: contain;">
+        </div>
+        <div class="modal-footer">
+          <button id="modalDownload" class="btn-primary">📥 Download Certificate</button>
+          <button id="modalClose" class="btn-secondary">Close</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div id="certificateModal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Certificate - Full View</h3>
-        <button class="modal-close" id="closeModal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <img id="modalCertificateImage" src="" alt="Certificate Full View" style="max-width: 100%; max-height: 80vh; object-fit: contain;">
-      </div>
-      <div class="modal-footer">
-        <button id="modalDownload" class="btn-primary">📥 Download Certificate</button>
-        <button id="modalClose" class="btn-secondary">Close</button>
-      </div>
-    </div>
-  </div>
+    <script src="firebase-email-service.js"></script>
 
-  <script src="firebase-email-service.js"></script>
+    <script type="module">
+      import { db, auth, rtdb } from "./firebase-config.js";
+      import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+      import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+      import { ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+      import { initNotifications } from "./notifications.js";
 
-  <script type="module">
-    import { db, auth, rtdb } from "./firebase-config.js";
-    import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-    import { initNotifications } from "./notifications.js";
-
-    onAuthStateChanged(auth, (user) => {
-      if (!user || user.email !== "mangotangodev.ph@gmail.com") {
-        window.location.replace("admin-login.html");
-      }
-    });
-
-    document.querySelector(".logout-link").addEventListener("click", async (e) => {
-      e.preventDefault();
-      await signOut(auth);
-      window.location.replace("admin-login.html");
-    });
-
-    const params = new URLSearchParams(window.location.search);
-    const technicianId = params.get("id");
-
-    async function loadCertificateImage(certificateUrl, technicianName) {
-      try {
-        console.log("🔍 Starting certificate load for:", certificateUrl);
-        console.log("🔍 RTDB instance:", rtdb);
-        
-        let imagePath = certificateUrl;
-        if (!certificateUrl.startsWith('technician_images/')) {
-          imagePath = `technician_images/certificates/${certificateUrl}`;
+      onAuthStateChanged(auth, (user) => {
+        if (!user || user.email !== "mangotangodev.ph@gmail.com") {
+          window.location.replace("admin-login.html");
         }
+      });
 
-        console.log("🔍 Final image path:", imagePath);
+      document.querySelector(".logout-link").addEventListener("click", async (e) => {
+        e.preventDefault();
+        await signOut(auth);
+        window.location.replace("admin-login.html");
+      });
 
-        console.log("🔍 Attempting to fetch from RTDB...");
-        const snapshot = await get(ref(rtdb, imagePath));
-        console.log("🔍 Snapshot exists:", snapshot.exists());
-        
-        const imageData = snapshot.val();
-        console.log("🔍 Raw image data:", imageData);
-        console.log("🔍 Image data type:", typeof imageData);
-        console.log("🔍 Image data keys:", imageData ? Object.keys(imageData) : 'null');
+      const params = new URLSearchParams(window.location.search);
+      const technicianId = params.get("id");
 
-        if (imageData) {
-          if (imageData.base64) {
-            console.log("✅ Found base64 in imageData.base64");
-            displayCertificate(imageData.base64, technicianName);
-            return true;
-          } else if (typeof imageData === 'string') {
-            console.log("✅ Found base64 as string");
-            displayCertificate(imageData, technicianName);
-            return true;
-          } else if (imageData.data) {
-            console.log("✅ Found base64 in imageData.data");
-            displayCertificate(imageData.data, technicianName);
-            return true;
+      async function loadCertificateImage(certificateUrl, technicianName) {
+        try {
+          console.log("🔍 Starting certificate load for:", certificateUrl);
+          console.log("🔍 RTDB instance:", rtdb);
+
+          let imagePath = certificateUrl;
+          if (!certificateUrl.startsWith('technician_images/')) {
+            imagePath = `technician_images/certificates/${certificateUrl}`;
+          }
+
+          console.log("🔍 Final image path:", imagePath);
+
+          console.log("🔍 Attempting to fetch from RTDB...");
+          const snapshot = await get(ref(rtdb, imagePath));
+          console.log("🔍 Snapshot exists:", snapshot.exists());
+
+          const imageData = snapshot.val();
+          console.log("🔍 Raw image data:", imageData);
+          console.log("🔍 Image data type:", typeof imageData);
+          console.log("🔍 Image data keys:", imageData ? Object.keys(imageData) : 'null');
+
+          if (imageData) {
+            if (imageData.base64) {
+              console.log("✅ Found base64 in imageData.base64");
+              displayCertificate(imageData.base64, technicianName);
+              return true;
+            } else if (typeof imageData === 'string') {
+              console.log("✅ Found base64 as string");
+              displayCertificate(imageData, technicianName);
+              return true;
+            } else if (imageData.data) {
+              console.log("✅ Found base64 in imageData.data");
+              displayCertificate(imageData.data, technicianName);
+              return true;
+            } else {
+              console.log("❌ No base64 data found in any expected field");
+              console.log("🔍 Available fields:", Object.keys(imageData));
+              return false;
+            }
           } else {
-            console.log("❌ No base64 data found in any expected field");
-            console.log("🔍 Available fields:", Object.keys(imageData));
+            console.log("❌ No image data retrieved from path:", imagePath);
             return false;
           }
-        } else {
-          console.log("❌ No image data retrieved from path:", imagePath);
+        } catch (error) {
+          console.error('❌ Certificate loading error:', error);
+          console.error('❌ Error details:', error.message);
           return false;
         }
-      } catch (error) {
-        console.error('❌ Certificate loading error:', error);
-        console.error('❌ Error details:', error.message);
-        return false;
-      }
-    }
-
-    function displayCertificate(base64Data, technicianName) {
-      const certificatePreview = document.getElementById("certificatePreview");
-      const certificateLoading = document.getElementById("certificateLoading");
-      const certificateError = document.getElementById("certificateError");
-      const viewFullScreen = document.getElementById("viewFullScreen");
-      const downloadCertificate = document.getElementById("downloadCertificate");
-
-      if (certificatePreview) {
-        let imageUrl;
-        if (base64Data.startsWith('data:')) {
-          imageUrl = base64Data;
-          console.log("✅ Using base64 data with existing data URL prefix");
-        } else {
-          imageUrl = `data:image/jpeg;base64,${base64Data}`;
-          console.log("✅ Adding data URL prefix to base64 data");
-        }
-        
-        console.log("✅ Setting certificate image URL:", imageUrl.substring(0, 50) + "...");
-        certificatePreview.src = imageUrl;
-        window.currentCertificateUrl = imageUrl;
-
-        if (certificateLoading) certificateLoading.style.display = "none";
-        if (certificateError) certificateError.style.display = "none";
-        if (viewFullScreen) viewFullScreen.style.display = "inline-block";
-        if (downloadCertificate) downloadCertificate.style.display = "inline-block";
-
-        console.log("✅ Certificate displayed successfully");
-      }
-    }
-
-    async function loadTechnician() {
-      if (!technicianId) {
-        alert("No technician ID provided!");
-        window.location.href = "approval.html";
-        return;
       }
 
-      try {
-        const loadingElements = ['firstNameBox', 'lastNameBox', 'emailBox', 'expertiseBox', 'addressBox'];
-        loadingElements.forEach(id => {
-          const element = document.getElementById(id);
-          if (element) element.textContent = "Loading...";
-        });
+      function displayCertificate(base64Data, technicianName) {
+        const certificatePreview = document.getElementById("certificatePreview");
+        const certificateLoading = document.getElementById("certificateLoading");
+        const certificateError = document.getElementById("certificateError");
+        const viewFullScreen = document.getElementById("viewFullScreen");
+        const downloadCertificate = document.getElementById("downloadCertificate");
 
-        const docRef = doc(db, "technician", technicianId);
-        const snapshot = await getDoc(docRef);
-
-        if (snapshot.exists()) {
-          const data = snapshot.data();
-          console.log("Technician data:", data);
-          
-          const firstNameBox = document.getElementById("firstNameBox");
-          const lastNameBox = document.getElementById("lastNameBox");
-          const emailBox = document.getElementById("emailBox");
-          const expertiseBox = document.getElementById("expertiseBox");
-          const addressBox = document.getElementById("addressBox");
-          const certificatePreview = document.getElementById("certificatePreview");
-          const certificateLoading = document.getElementById("certificateLoading");
-          const certificateError = document.getElementById("certificateError");
-          const viewFullScreen = document.getElementById("viewFullScreen");
-          const downloadCertificate = document.getElementById("downloadCertificate");
-
-          if (firstNameBox) firstNameBox.textContent = data.firstName || "N/A";
-          if (lastNameBox) lastNameBox.textContent = data.lastName || "N/A";
-          if (emailBox) emailBox.textContent = data.email || "N/A";
-          if (expertiseBox) expertiseBox.textContent = data.expertise || "N/A";
-          if (addressBox) addressBox.textContent = data.address || "N/A";
-
-          console.log("📋 All technician data:", data);
-          console.log("📋 Available fields:", Object.keys(data));
-          
-          const certificateUrl = data.certificateUrl;
-          const technicianName = `${data.firstName || ''} ${data.lastName || ''}`.trim();
-          
-          console.log("📋 Certificate URL from Firestore:", certificateUrl);
-          console.log("📋 Certificate URL type:", typeof certificateUrl);
-          console.log("📋 Technician name:", technicianName);
-          
-          if (certificateUrl) {
-            console.log("📋 Certificate URL exists, starting load process...");
-            if (certificateLoading) certificateLoading.style.display = "block";
-            if (certificateError) certificateError.style.display = "none";
-            
-            const success = await loadCertificateImage(certificateUrl, technicianName);
-            
-            if (!success) {
-              console.log("❌ Failed to load certificate, showing default");
-              if (certificateLoading) certificateLoading.style.display = "none";
-              if (certificateError) certificateError.style.display = "block";
-              if (certificatePreview) certificatePreview.src = "images/certificate.png";
-            }
+        if (certificatePreview) {
+          let imageUrl;
+          if (base64Data.startsWith('data:')) {
+            imageUrl = base64Data;
+            console.log("✅ Using base64 data with existing data URL prefix");
           } else {
-            console.log("❌ No certificate URL found in technician data");
-            console.log("📋 Checking alternative field names...");
-            
-            const altFields = ['certificate', 'certificateImage', 'cert_url', 'imageUrl', 'certificatePath'];
-            let foundAlt = false;
-            
-            for (const field of altFields) {
-              if (data[field]) {
-                console.log(`📋 Found certificate in field '${field}':`, data[field]);
-                foundAlt = true;
-                break;
-              }
-            }
-            
-            if (!foundAlt) {
-              console.log("❌ No certificate found in any field");
-            }
-            
-            if (certificatePreview) {
-              certificatePreview.src = "images/certificate.png";
-              if (certificateError) certificateError.style.display = "block";
-            }
+            imageUrl = `data:image/jpeg;base64,${base64Data}`;
+            console.log("✅ Adding data URL prefix to base64 data");
           }
-        } else {
-          alert("Technician not found!");
-          window.location.href = "approval.html";
-        }
-      } catch (error) {
-        console.error("Error loading technician:", error);
-        alert("Error loading technician data: " + error.message);
-      }
-    }
 
-    document.getElementById("approveBtn").addEventListener("click", async () => {
-      try {
-        console.log('🔍 Fetching technician data for approval, technicianId:', technicianId);
-        const technicianDoc = await getDoc(doc(db, "technician", technicianId));
-        
-        if (!technicianDoc.exists()) {
-          console.error('❌ Technician document not found for technicianId:', technicianId);
-          alert('❌ Error: Technician not found');
+          console.log("✅ Setting certificate image URL:", imageUrl.substring(0, 50) + "...");
+          certificatePreview.src = imageUrl;
+          window.currentCertificateUrl = imageUrl;
+
+          if (certificateLoading) certificateLoading.style.display = "none";
+          if (certificateError) certificateError.style.display = "none";
+          if (viewFullScreen) viewFullScreen.style.display = "inline-block";
+          if (downloadCertificate) downloadCertificate.style.display = "inline-block";
+
+          console.log("✅ Certificate displayed successfully");
+        }
+      }
+
+      async function loadTechnician() {
+        if (!technicianId) {
+          alert("No technician ID provided!");
+          window.location.href = "approval.html";
           return;
         }
-        
-        const technicianData = technicianDoc.data();
-        console.log('📄 Fetched technician data for approval:', technicianData);
-        console.log('📧 Email address found:', technicianData.email);
-        console.log('👤 Name found:', technicianData.firstName, technicianData.lastName);
-        
-        await updateDoc(doc(db, "technician", technicianId), { 
-          status: "Approved",
-          updatedAt: new Date().toISOString(),
-          updatedBy: "mangotangodev.ph@gmail.com"
-        });
-        
-        console.log('✅ Database updated successfully for approval');
-        
+
         try {
-          // Validate email data before sending
-          if (!technicianData.email) {
-            console.error('❌ No email address found in technician data for approval');
-            alert('❌ Error: No email address found for technician');
+          const loadingElements = ['firstNameBox', 'lastNameBox', 'emailBox', 'expertiseBox', 'addressBox'];
+          loadingElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = "Loading...";
+          });
+
+          const docRef = doc(db, "technician", technicianId);
+          const snapshot = await getDoc(docRef);
+
+          if (snapshot.exists()) {
+            const data = snapshot.data();
+            console.log("Technician data:", data);
+
+            const firstNameBox = document.getElementById("firstNameBox");
+            const lastNameBox = document.getElementById("lastNameBox");
+            const emailBox = document.getElementById("emailBox");
+            const expertiseBox = document.getElementById("expertiseBox");
+            const addressBox = document.getElementById("addressBox");
+            const certificatePreview = document.getElementById("certificatePreview");
+            const certificateLoading = document.getElementById("certificateLoading");
+            const certificateError = document.getElementById("certificateError");
+            const viewFullScreen = document.getElementById("viewFullScreen");
+            const downloadCertificate = document.getElementById("downloadCertificate");
+
+            if (firstNameBox) firstNameBox.textContent = data.firstName || "N/A";
+            if (lastNameBox) lastNameBox.textContent = data.lastName || "N/A";
+            if (emailBox) emailBox.textContent = data.email || "N/A";
+            if (expertiseBox) expertiseBox.textContent = data.expertise || "N/A";
+            if (addressBox) addressBox.textContent = data.address || "N/A";
+
+            console.log("📋 All technician data:", data);
+            console.log("📋 Available fields:", Object.keys(data));
+
+            const certificateUrl = data.certificateUrl;
+            const technicianName = `${data.firstName || ''} ${data.lastName || ''}`.trim();
+
+            console.log("📋 Certificate URL from Firestore:", certificateUrl);
+            console.log("📋 Certificate URL type:", typeof certificateUrl);
+            console.log("📋 Technician name:", technicianName);
+
+            if (certificateUrl) {
+              console.log("📋 Certificate URL exists, starting load process...");
+              if (certificateLoading) certificateLoading.style.display = "block";
+              if (certificateError) certificateError.style.display = "none";
+
+              const success = await loadCertificateImage(certificateUrl, technicianName);
+
+              if (!success) {
+                console.log("❌ Failed to load certificate, showing default");
+                if (certificateLoading) certificateLoading.style.display = "none";
+                if (certificateError) certificateError.style.display = "block";
+                if (certificatePreview) certificatePreview.src = "images/certificate.png";
+              }
+            } else {
+              console.log("❌ No certificate URL found in technician data");
+              console.log("📋 Checking alternative field names...");
+
+              const altFields = ['certificate', 'certificateImage', 'cert_url', 'imageUrl', 'certificatePath'];
+              let foundAlt = false;
+
+              for (const field of altFields) {
+                if (data[field]) {
+                  console.log(`📋 Found certificate in field '${field}':`, data[field]);
+                  foundAlt = true;
+                  break;
+                }
+              }
+
+              if (!foundAlt) {
+                console.log("❌ No certificate found in any field");
+              }
+
+              if (certificatePreview) {
+                certificatePreview.src = "images/certificate.png";
+                if (certificateError) certificateError.style.display = "block";
+              }
+            }
+          } else {
+            alert("Technician not found!");
+            window.location.href = "approval.html";
+          }
+        } catch (error) {
+          console.error("Error loading technician:", error);
+          alert("Error loading technician data: " + error.message);
+        }
+      }
+
+      document.getElementById("approveBtn").addEventListener("click", async () => {
+        try {
+          const technicianDoc = await getDoc(doc(db, "technician", technicianId));
+
+          if (!technicianDoc.exists()) {
+            alert("❌ Technician not found");
             return;
           }
-          
-          console.log('📧 Attempting to send approval email to:', technicianData.email);
-          
-          // Send detailed approval email with login instructions
-          const emailSent = await window.EmailService.sendApprovalEmailWithInstructions(technicianData);
-          
-          if (emailSent) {
-            alert(`✅ Technician approved successfully!\n📧 Approval email with login instructions sent to ${technicianData.email}`);
-            window.EmailService.showEmailNotification(
-              `🎉 ${technicianData.firstName} ${technicianData.lastName} approved and notified via email!`, 
-              'success'
-            );
-          } else {
-            alert(`✅ Technician approved successfully!\n⚠️ Email notification failed to send.`);
-            window.EmailService.showEmailNotification(
-              `⚠️ Approval completed but email failed to send to ${technicianData.email}`, 
-              'warning'
-            );
-          }
-        } catch (emailError) {
-          console.error("Email sending error:", emailError);
-          alert(`✅ Technician approved successfully!\n❌ Email notification failed: ${emailError.message}`);
-          window.EmailService.showEmailNotification(
-            `❌ Email sending failed: ${emailError.message}`, 
-            'error'
-          );
-        }
-        
-        window.location.href = "approval.html";
-      } catch (error) {
-        console.error("Error approving technician:", error);
-        alert("Error approving technician: " + error.message);
-      }
-    });
 
-    document.getElementById("rejectBtn").addEventListener("click", async () => {
-      try {
-        const technicianDoc = await getDoc(doc(db, "technician", technicianId));
-        const technicianData = technicianDoc.data();
-        
-        await updateDoc(doc(db, "technician", technicianId), { 
-          status: "Rejected",
-          updatedAt: new Date().toISOString(),
-          updatedBy: "mangotangodev.ph@gmail.com"
-        });
-        
+          const data = technicianDoc.data();
+
+          // Update Firestore first
+          await updateDoc(doc(db, "technician", technicianId), {
+            status: "Approved",
+            updatedAt: new Date().toISOString(),
+            updatedBy: "mangotangodev.ph@gmail.com"
+          });
+
+          // Secure backend email call
+          const response = await fetch("http://localhost:3000/approve-tech", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: data.email,
+              name: `${data.firstName} ${data.lastName}`
+            })
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            alert(`✅ Technician approved!\n📧 Email sent to ${data.email}`);
+          } else {
+            alert(`⚠️ Approved, but email failed: ${result.error}`);
+          }
+
+          window.location.href = "approval.html";
+
+        } catch (error) {
+          alert("Error approving technician: " + error.message);
+        }
+      });
+
+      document.getElementById("rejectBtn").addEventListener("click", async () => {
         try {
-          const emailSent = await window.EmailService.sendRejectionEmail(technicianData);
-          
-          if (emailSent) {
-            alert(`❌ Technician rejected.\n📧 Rejection email sent to ${technicianData.email}`);
-            window.EmailService.showEmailNotification(
-              `📧 Rejection email sent to ${technicianData.firstName} ${technicianData.lastName}`, 
-              'info'
-            );
+          const technicianDoc = await getDoc(doc(db, "technician", technicianId));
+
+          if (!technicianDoc.exists()) {
+            alert("❌ Technician not found");
+            return;
+          }
+
+          const data = technicianDoc.data();
+
+          // Ask for a decline reason (optional)
+          const reason = prompt("Enter reason for rejection (optional):") || "";
+
+          // Update Firestore
+          await updateDoc(doc(db, "technician", technicianId), {
+            status: "Rejected",
+            updatedAt: new Date().toISOString(),
+            updatedBy: "mangotangodev.ph@gmail.com"
+          });
+
+          // Secure backend email call
+          const response = await fetch("http://localhost:3000/decline-tech", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: data.email,
+              name: `${data.firstName} ${data.lastName}`,
+              reason: reason
+            })
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            alert(`❌ Technician rejected.\n📧 Rejection email sent to ${data.email}`);
           } else {
-            alert(`❌ Technician rejected.\n⚠️ Email notification failed to send.`);
-            window.EmailService.showEmailNotification(
-              `⚠️ Rejection completed but email failed to send to ${technicianData.email}`, 
-              'warning'
-            );
+            alert(`⚠️ Rejected, but email failed: ${result.error}`);
           }
-        } catch (emailError) {
-          console.error("Email sending error:", emailError);
-          alert(`❌ Technician rejected.\n❌ Email notification failed: ${emailError.message}`);
-          window.EmailService.showEmailNotification(
-            `❌ Email sending failed: ${emailError.message}`, 
-            'error'
-          );
+
+          window.location.href = "approval.html";
+
+        } catch (error) {
+          alert("Error rejecting technician: " + error.message);
         }
-        
-        window.location.href = "approval.html";
-      } catch (error) {
-        console.error("Error rejecting technician:", error);
-        alert("Error rejecting technician: " + error.message);
-      }
-    });
+      });
 
-    function setupModalEvents() {
-      const certificatePreview = document.getElementById("certificatePreview");
-      const viewFullScreen = document.getElementById("viewFullScreen");
-      const downloadCertificate = document.getElementById("downloadCertificate");
-      const certificateModal = document.getElementById("certificateModal");
-      const modalCertificateImage = document.getElementById("modalCertificateImage");
-      const closeModal = document.getElementById("closeModal");
-      const modalClose = document.getElementById("modalClose");
-      const modalDownload = document.getElementById("modalDownload");
+      function setupModalEvents() {
+        const certificatePreview = document.getElementById("certificatePreview");
+        const viewFullScreen = document.getElementById("viewFullScreen");
+        const downloadCertificate = document.getElementById("downloadCertificate");
+        const certificateModal = document.getElementById("certificateModal");
+        const modalCertificateImage = document.getElementById("modalCertificateImage");
+        const closeModal = document.getElementById("closeModal");
+        const modalClose = document.getElementById("modalClose");
+        const modalDownload = document.getElementById("modalDownload");
 
-      function openModal() {
-        if (window.currentCertificateUrl && certificateModal && modalCertificateImage) {
-          modalCertificateImage.src = window.currentCertificateUrl;
-          certificateModal.style.display = "flex";
+        function openModal() {
+          if (window.currentCertificateUrl && certificateModal && modalCertificateImage) {
+            modalCertificateImage.src = window.currentCertificateUrl;
+            certificateModal.style.display = "flex";
+          }
         }
-      }
 
-      function closeModalFunc() {
+        function closeModalFunc() {
+          if (certificateModal) {
+            certificateModal.style.display = "none";
+          }
+        }
+
+        function downloadCert() {
+          if (window.currentCertificateUrl) {
+            const link = document.createElement('a');
+            link.href = window.currentCertificateUrl;
+            link.download = 'certificate.jpg';
+            link.click();
+          }
+        }
+
+        if (certificatePreview) certificatePreview.addEventListener("click", openModal);
+        if (viewFullScreen) viewFullScreen.addEventListener("click", openModal);
+        if (downloadCertificate) downloadCertificate.addEventListener("click", downloadCert);
+        if (closeModal) closeModal.addEventListener("click", closeModalFunc);
+        if (modalClose) modalClose.addEventListener("click", closeModalFunc);
+        if (modalDownload) modalDownload.addEventListener("click", downloadCert);
+
         if (certificateModal) {
-          certificateModal.style.display = "none";
+          certificateModal.addEventListener("click", (e) => {
+            if (e.target === certificateModal) {
+              closeModalFunc();
+            }
+          });
         }
       }
 
-      function downloadCert() {
-        if (window.currentCertificateUrl) {
-          const link = document.createElement('a');
-          link.href = window.currentCertificateUrl;
-          link.download = 'certificate.jpg';
-          link.click();
+      window.addEventListener('DOMContentLoaded', async () => {
+        loadTechnician();
+        setupModalEvents();
+        await initNotifications(db);
+      });
+
+      window.addEventListener('popstate', () => {
+        if (!auth.currentUser) {
+          window.location.replace('admin-login.html');
         }
-      }
-
-      if (certificatePreview) certificatePreview.addEventListener("click", openModal);
-      if (viewFullScreen) viewFullScreen.addEventListener("click", openModal);
-      if (downloadCertificate) downloadCertificate.addEventListener("click", downloadCert);
-      if (closeModal) closeModal.addEventListener("click", closeModalFunc);
-      if (modalClose) modalClose.addEventListener("click", closeModalFunc);
-      if (modalDownload) modalDownload.addEventListener("click", downloadCert);
-
-      if (certificateModal) {
-        certificateModal.addEventListener("click", (e) => {
-          if (e.target === certificateModal) {
-            closeModalFunc();
-          }
-        });
-      }
-    }
-
-    window.addEventListener('DOMContentLoaded', async () => {
-      loadTechnician();
-      setupModalEvents();
-      await initNotifications(db);
-    });
-
-    window.addEventListener('popstate', () => {
-      if (!auth.currentUser) {
-        window.location.replace('admin-login.html');
-      }
-    });
-  </script>
+      });
+    </script>
 </body>
+
 </html>

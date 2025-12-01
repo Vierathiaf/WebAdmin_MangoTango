@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Approval</title>
   <link rel="stylesheet" href="styles.css">
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate"/>
-  <meta http-equiv="Pragma" content="no-cache"/>
-  <meta http-equiv="Expires" content="0"/>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
 </head>
+
 <body>
   <div class="layout">
     <!-- Sidebar -->
@@ -44,7 +46,12 @@
       <div class="content-header">
         <h1>Account Approval</h1>
         <div class="notif-container">
-          <button class="notif-bell" aria-label="Notifications">🔔
+          <button class="notif-bell" aria-label="Notifications">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
             <span class="notif-badge" hidden>0</span>
           </button>
           <div class="notif-panel" hidden>
@@ -83,13 +90,11 @@
     </div>
   </div>
 
-  <script src="firebase-email-service.js"></script>
-
   <script type="module">
     import { db, auth } from "./firebase-config.js";
-    import { collection, onSnapshot, doc, updateDoc, getDoc } 
+    import { collection, onSnapshot, doc, updateDoc, getDoc }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { signOut, onAuthStateChanged } 
+    import { signOut, onAuthStateChanged }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { initNotifications } from "./notifications.js";
 
@@ -170,94 +175,76 @@
     }
 
     async function updateStatus(docId, newStatus) {
-      try {
-        console.log('🔍 Fetching technician data for docId:', docId);
-        const technicianDoc = await getDoc(doc(db, "technician", docId));
-        
-        if (!technicianDoc.exists()) {
-          console.error('❌ Technician document not found for docId:', docId);
-          showNotification('Error: Technician not found', 'error');
-          return;
-        }
-        
-        const technicianData = technicianDoc.data();
-        console.log('📄 Fetched technician data:', technicianData);
-        console.log('📧 Email address found:', technicianData.email);
-        console.log('👤 Name found:', technicianData.firstName, technicianData.lastName);
-        
-        const updateData = { 
-          status: newStatus,
-          updatedAt: new Date().toISOString(),
-          updatedBy: "mangotangodev.ph@gmail.com"
-        };
-        
-        await updateDoc(doc(db, "technician", docId), updateData);
-        console.log('✅ Database updated successfully');
-        
-        if (newStatus === "Approved") {
-          try {
-            // Show immediate approval notification
-            showNotification(`✅ Technician ${technicianData.firstName} ${technicianData.lastName} approved successfully!`, 'success');
-            
-            // Validate email data before sending
-            if (!technicianData.email) {
-              console.error('❌ No email address found in technician data');
-              showNotification('Error: No email address found for technician', 'error');
-              return;
-            }
-            
-            console.log('📧 Attempting to send approval email to:', technicianData.email);
-            
-            // Send detailed approval email with login instructions
-            const emailSent = await window.EmailService.sendApprovalEmailWithInstructions(technicianData);
-            
-            if (emailSent) {
-              // Show success notification for email
-              setTimeout(() => {
-                window.EmailService.showEmailNotification(
-                  `📧 Approval email with login instructions sent to ${technicianData.email}`, 
-                  'success'
-                );
-              }, 1000);
-            } else {
-              // Show warning if email failed
-              setTimeout(() => {
-                window.EmailService.showEmailNotification(
-                  `⚠️ Technician approved but email failed to send to ${technicianData.email}`, 
-                  'warning'
-                );
-              }, 1000);
-            }
-          } catch (emailError) {
-            console.error("Email sending error:", emailError);
-            setTimeout(() => {
-              window.EmailService.showEmailNotification(
-                `❌ Email sending failed: ${emailError.message}`, 
-                'error'
-              );
-            }, 1000);
-          }
-        } else if (newStatus === "Rejected") {
-          try {
-            const emailSent = await window.EmailService.sendRejectionEmail(technicianData);
-            if (emailSent) {
-              showNotification(`Technician rejected and email sent successfully!`, 'success');
-            } else {
-              showNotification(`Technician rejected but email failed to send.`, 'warning');
-            }
-          } catch (emailError) {
-            console.error("Email sending error:", emailError);
-            showNotification(`Technician rejected but email failed to send.`, 'warning');
-          }
-        } else {
-          showNotification(`Technician ${newStatus.toLowerCase()} successfully!`, 'success');
-        }
-      } catch (err) {
-        console.error("Error updating status:", err);
-        showNotification(`Error updating status: ${err.message}`, 'error');
-      }
+  try {
+    const technicianDoc = await getDoc(doc(db, "technician", docId));
+    if (!technicianDoc.exists()) {
+      showNotification("Error: Technician not found", "error");
+      return;
     }
 
+    const technicianData = technicianDoc.data();
+    const fullName = `${technicianData.firstName} ${technicianData.lastName}`;
+
+    // Update Firestore status
+    await updateDoc(doc(db, "technician", docId), {
+      status: newStatus,
+      updatedAt: new Date().toISOString(),
+      updatedBy: "mangotangodev.ph@gmail.com"
+    });
+
+    showNotification(`Technician ${newStatus}!`, "success");
+
+    // -------------------------------
+    // 🚀 SEND EMAIL THROUGH NODE.JS
+    // -------------------------------
+    if (newStatus === "Approved") {
+      try {
+        const response = await fetch("http://localhost:3000/approve-tech", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: technicianData.email,
+            name: fullName
+          })
+        });
+        
+        if (response.ok) {
+          showNotification(`Approval email sent to ${technicianData.email}`, "success");
+        } else {
+          showNotification("Failed to send approval email", "error");
+        }
+      } catch (error) {
+        console.error("Error sending approval email:", error);
+        showNotification("Error sending approval email", "error");
+      }
+    } else if (newStatus === "Rejected") {
+      try {
+        const reason = prompt("Please provide a reason for rejection (optional):", "");
+        const response = await fetch("http://localhost:3000/decline-tech", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: technicianData.email,
+            name: fullName,
+            reason: reason || "No reason provided"
+          })
+        });
+        
+        if (response.ok) {
+          showNotification(`Rejection email sent to ${technicianData.email}`, "success");
+        } else {
+          showNotification("Failed to send rejection email", "error");
+        }
+      } catch (error) {
+        console.error("Error sending rejection email:", error);
+        showNotification("Error sending rejection email", "error");
+      }
+    }
+  } catch (err) {
+    console.error("Error updating status:", err);
+    showNotification(`Error: ${err.message}`, "error");
+  }
+}
     function showNotification(message, type) {
       const notification = document.createElement('div');
       notification.className = `notification ${type}`;
@@ -265,9 +252,9 @@
         <span>${message}</span>
         <button onclick="this.parentElement.remove()">×</button>
       `;
-      
+
       document.body.appendChild(notification);
-      
+
       setTimeout(() => {
         if (notification.parentElement) {
           notification.remove();
