@@ -90,19 +90,25 @@
 
     .login-header {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 15px;
+      /* reduced */
+      margin-top: -10px;
+      /* pulls logo upward, fixes spacing */
     }
 
     .login-logo {
-      width: 60px;
-      height: 60px;
-      margin-bottom: 15px;
-    }
+      width: 110px;
+      /* bigger & professional */
+      height: 110px;
+      margin-bottom: 1px;
+      /* tighter spacing between logo & title */
+    }S
+
 
     .login-title {
       font-size: 28px;
       font-weight: 800;
-      color: #1a202c;
+      color: #06235d4e;
       margin-bottom: 8px;
       letter-spacing: -0.5px;
     }
@@ -190,30 +196,33 @@
     }
 
     .checkbox-wrapper {
-  margin-bottom: 30px; /* adds space before the login button */
-}
+      margin-bottom: 30px;
+      /* adds space before the login button */
+    }
 
-.checkbox-container {
-  display: flex;
-  align-items: center; /* centers checkbox and text vertically */
-  gap: 8px; /* space between checkbox and label */
-}
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      /* centers checkbox and text vertically */
+      gap: 8px;
+      /* space between checkbox and label */
+    }
 
-.checkbox-container input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  cursor: pointer;
-}
+    .checkbox-container input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      cursor: pointer;
+    }
 
-.checkbox-container label {
-  margin: 0;
-  font-size: 14px;
-  color: #4a5568;
-  cursor: pointer;
-  line-height: 1;
-  font-weight: 600;
-}
+    .checkbox-container label {
+      margin: 0;
+      font-size: 14px;
+      color: #4a5568;
+      cursor: pointer;
+      line-height: 1;
+      font-weight: 600;
+    }
 
     .remember-container {
       display: flex;
@@ -394,78 +403,187 @@
   </div>
 
   <script type="module">
-    import { auth } from "./firebase-config.js";
-    import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      setPersistence, 
+      browserSessionPersistence,
+      inMemoryPersistence
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
-    const loginForm = document.getElementById("loginForm");
+    // Initialize Firebase with error handling
+    try {
+      const firebaseConfig = {
+        apiKey: "AIzaSyCop9FnqrMS7zDmBruG1IH9S-EZhc6sexk",
+        authDomain: "mangotango-mobile.firebaseapp.com",
+        databaseURL: "https://mangotango-mobile-default-rtdb.firebaseio.com",
+        projectId: "mangotango-mobile",
+        storageBucket: "mangotango-mobile.appspot.com",
+        messagingSenderId: "85435573414",
+        appId: "1:85435573414:web:37fb969be0df109a974067",
+        measurementId: "G-E2TX3PEMFY"
+      };
 
-    onAuthStateChanged(auth, (user) => {
-      if (user && user.email === "mangotangodev.ph@gmail.com") {
-        window.location.href = "dashboard.html";
-      }
-    });
-
-    async function ensureAdminExists() {
-      try {
-        await createUserWithEmailAndPassword(auth, "mangotangodev.ph@gmail.com", "admin@mangotango2025");
-        console.log("✅ Admin account created successfully");
-      } catch (error) {
-        if (error.code === 'auth/email-already-in-use') {
-          console.log("✅ Admin account already exists - ready to login");
-        } else {
-          console.error("❌ Error with admin account:", error);
-          // Don't show error to user for account creation issues
-        }
-      }
-    }
-
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-
-      if (email !== "mangotangodev.ph@gmail.com") {
-        alert("❌ Access denied. Admin credentials required.");
-        return;
-      }
-
-      try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        console.log("✅ Admin login successful");
-        window.location.href = "dashboard.html";
-      } catch (error) {
-        console.error("❌ Login error:", error);
-        if (error.code === 'auth/user-not-found') {
-          alert("❌ Admin account not found. Please contact system administrator.");
-        } else if (error.code === 'auth/wrong-password') {
-          alert("❌ Invalid password. Please try again.");
-        } else {
-          alert("❌ Login failed: " + error.message);
-        }
-      }
-    });
-
-    // Initialize admin account on page load
-    ensureAdminExists();
-
-    // Password toggle functionality
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
-    const eyeIcon = document.getElementById('eyeIcon');
-
-    togglePassword.addEventListener('click', function() {
-      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordInput.setAttribute('type', type);
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
       
-      // Toggle eye icon
-      if (type === 'password') {
-        eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
-      } else {
-        eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+      // Set persistence with fallback to in-memory if IndexedDB fails
+      const setPersistenceWithFallback = async () => {
+        try {
+          await setPersistence(auth, browserSessionPersistence);
+          console.log('Using browser session persistence');
+        } catch (error) {
+          console.warn("Could not set browser session persistence, falling back to in-memory:", error);
+          try {
+            await setPersistence(auth, inMemoryPersistence);
+            console.log('Using in-memory persistence as fallback');
+          } catch (fallbackError) {
+            console.error("Failed to set any persistence:", fallbackError);
+            // Continue without setting persistence
+          }
+        }
+      };
+      
+      // Initialize persistence
+      setPersistenceWithFallback();
+
+      const loginForm = document.getElementById("loginForm");
+      
+      // Check if user is already logged in
+      auth.onAuthStateChanged((user) => {
+        if (user && user.email === "mangotangodev.ph@gmail.com") {
+          console.log("✅ User already logged in, redirecting...");
+          window.location.href = "dashboard.html";
+        }
+      });
+
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const loginButton = document.querySelector('button[type="submit"]');
+        
+        // Clear any previous errors
+        const existingError = document.querySelector('.error-message');
+        if (existingError) existingError.remove();
+        
+        // Basic validation
+        if (!email || !password) {
+          showError("Please enter both email and password");
+          return;
+        }
+        
+        if (email !== "mangotangodev.ph@gmail.com") {
+          showError("Access denied. Admin credentials required.");
+          return;
+        }
+
+        try {
+          loginButton.disabled = true;
+          loginButton.textContent = 'Signing in...';
+          
+          // Try with regular sign-in first
+          try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            console.log("✅ Login successful");
+            window.location.href = "dashboard.html";
+            return;
+          } catch (signInError) {
+            console.log("Regular sign-in failed, trying with in-memory persistence:", signInError);
+            
+            // If regular sign-in fails, try with in-memory persistence
+            try {
+              await setPersistence(auth, inMemoryPersistence);
+              const userCredential = await signInWithEmailAndPassword(auth, email, password);
+              console.log("✅ Login successful with in-memory persistence");
+              window.location.href = "dashboard.html";
+              return;
+            } catch (memoryError) {
+              // If we get here, both attempts failed
+              console.error("❌ Both login attempts failed:", memoryError);
+              throw memoryError; // This will be caught by the outer catch block
+            }
+          }
+        } catch (error) {
+          console.error("❌ Login error:", error);
+          let errorMessage = "Login failed. Please try again.";
+          
+          switch(error.code) {
+            case 'auth/user-not-found':
+              errorMessage = "No account found with this email.";
+              break;
+            case 'auth/wrong-password':
+              errorMessage = "Incorrect password. Please try again.";
+              break;
+            case 'auth/too-many-requests':
+              errorMessage = "Too many failed attempts. Please try again later.";
+              break;
+            case 'auth/network-request-failed':
+              errorMessage = "Network error. Please check your connection.";
+              break;
+          }
+          
+          showError(errorMessage);
+        } finally {
+          loginButton.disabled = false;
+          loginButton.textContent = 'Log In';
+        }
+      });
+      
+      // Show error message to user
+      function showError(message) {
+        // Remove any existing error messages
+        const existingError = document.querySelector('.error-message');
+        if (existingError) existingError.remove();
+        
+        const errorElement = document.createElement('div');
+        errorElement.className = 'error-message';
+        errorElement.style.color = '#e53e3e';
+        errorElement.style.marginTop = '10px';
+        errorElement.style.textAlign = 'center';
+        errorElement.textContent = message;
+        
+        const form = document.getElementById('loginForm');
+        form.appendChild(errorElement);
       }
-    });
+      
+      // Password toggle functionality
+      const togglePassword = document.getElementById('togglePassword');
+      const passwordInput = document.getElementById('password');
+      const eyeIcon = document.getElementById('eyeIcon');
+
+      if (togglePassword && passwordInput && eyeIcon) {
+        togglePassword.addEventListener('click', function () {
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordInput.setAttribute('type', type);
+
+          // Toggle eye icon
+          if (type === 'password') {
+            eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+          } else {
+            eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+          }
+        });
+      }
+      
+    } catch (error) {
+      console.error("🔥 Critical Firebase initialization error:", error);
+      document.body.innerHTML = `
+        <div style="padding: 20px; color: #e53e3e; font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; text-align: center;">
+          <h2>Application Error</h2>
+          <p>Failed to initialize the application. Please try the following:</p>
+          <ol style="text-align: left; max-width: 400px; margin: 20px auto;">
+            <li>Refresh the page (Press F5 or Ctrl+R)</li>
+            <li>Clear your browser cache and try again</li>
+            <li>Try using a different browser</li>
+            <li>Contact support if the problem persists</li>
+          </ol>
+          <p><small>Error: ${error.message}</small></p>
+        </div>`;
+    }
   </script>
 </body>
 

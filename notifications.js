@@ -1,6 +1,11 @@
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-export async function initNotifications(db) {
+export function initNotifications(db) {
   const bell = document.querySelector('.notif-bell');
   const panel = document.querySelector('.notif-panel');
   const badge = document.querySelector('.notif-badge');
@@ -8,49 +13,71 @@ export async function initNotifications(db) {
 
   if (!bell || !panel || !badge || !list) return;
 
-  bell.addEventListener('click', () => {
-    const isHidden = panel.hasAttribute('hidden');
-    if (isHidden) panel.removeAttribute('hidden');
-    else panel.setAttribute('hidden', '');
+  // Toggle dropdown
+  bell.addEventListener("click", () => {
+    panel.toggleAttribute("hidden");
   });
 
-  document.addEventListener('click', (e) => {
+  document.addEventListener("click", (e) => {
     if (!panel.contains(e.target) && !bell.contains(e.target)) {
-      panel.setAttribute('hidden', '');
+      panel.setAttribute("hidden", "");
     }
   });
 
-  await loadNotifications(db, { badge, list });
+  // Listen to Firestore notifications
+  const notifRef = query(
+    collection(db, "notifications"),
+    orderBy("createdAt", "desc")
+  );
+
+  onSnapshot(
+    notifRef,
+    (snapshot) => {
+      list.innerHTML = "";
+      let unseenCount = 0;
+
+      snapshot.forEach((docSnap) => {
+        const d = docSnap.data();
+
+        // Skip invalid notifications
+        if (!d || !d.type) return;
+
+        // Count unread
+        if (d.read === false) unseenCount++;
+
+        // Build list item
+        const li = document.createElement("li");
+        li.className = "notif-item";
+
+        li.innerHTML = `
+          <div class="notif-title">${d.title || "New Notification"}</div>
+          <div class="notif-msg">${d.message || ""}</div>
+          <small class="notif-time">${formatTime(d.createdAt)}</small>
+        `;
+
+        list.appendChild(li);
+      });
+
+      // Badge update
+      if (unseenCount > 0) {
+        badge.textContent = unseenCount;
+        badge.hidden = false;
+      } else {
+        badge.hidden = true;
+      }
+    },
+    (error) => {
+      console.error("Notification listener error:", error);
+    }
+  );
 }
 
-async function loadNotifications(db, { badge, list }) {
-  list.innerHTML = "";
-  const today = new Date().toISOString().split('T')[0];
+function formatTime(timestamp) {
+  if (!timestamp) return "";
   try {
-    const snapshot = await getDocs(collection(db, 'technician'));
-    let count = 0;
-    snapshot.forEach((docSnap) => {
-      const d = docSnap.data();
-      const status = (d.status === 'Approved') ? 'Approved' : (d.status === 'Rejected' ? 'Rejected' : 'Pending');
-      if (status === 'Pending' && d.registrationDate === today) {
-        count++;
-        const name = `${d.firstName || ''} ${d.lastName || ''}`.trim() || 'New registration';
-        const li = document.createElement('li');
-        li.className = 'notif-item';
-        const a = document.createElement('a');
-        a.href = `register.html?id=${docSnap.id}`;
-        a.textContent = name;
-        li.appendChild(a);
-        list.appendChild(li);
-      }
-    });
-    if (count > 0) {
-      badge.textContent = String(count);
-      badge.hidden = false;
-    } else {
-      badge.hidden = true;
-    }
-  } catch (e) {
-    console.error('Error loading notifications', e);
+    const date = timestamp.toDate();
+    return date.toLocaleString();
+  } catch {
+    return "";
   }
 }
