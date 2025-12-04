@@ -352,8 +352,8 @@
           });
 
           // Secure backend email call
-          const response = await fetch("https://mangotango-admin-server.vercel.app/approve-tech", {
-            method: "POST",
+          const response = await fetch("http://localhost:3001/approve-tech", {
+    method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               email: data.email,
@@ -398,8 +398,8 @@
           });
 
           // Secure backend email call
-          const response = await fetch("https://mangotango-admin-server.vercel.app/decline-tech", {
-            method: "POST",
+          const response = await fetch("http://localhost:3001/decline-tech", {
+    method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               email: data.email,
