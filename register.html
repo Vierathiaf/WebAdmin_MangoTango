@@ -352,7 +352,7 @@
           });
 
           // Secure backend email call
-          const response = await fetch("http://localhost:3000/approve-tech", {
+          const response = await fetch("http://localhost:3001/approve-tech", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -398,7 +398,7 @@
           });
 
           // Secure backend email call
-          const response = await fetch("http://localhost:3000/decline-tech", {
+          const response = await fetch("http://localhost:3001/decline-tech", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
