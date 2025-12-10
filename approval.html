@@ -91,16 +91,33 @@
   </div>
 
   <script type="module">
+    console.log("Script loaded, initializing...");
     import { db, auth } from "./firebase-config.js";
-    import { collection, onSnapshot, doc, updateDoc, getDoc }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { collection, onSnapshot, doc, updateDoc, getDoc, getDocs }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { signOut, onAuthStateChanged }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { initNotifications } from "./notifications.js";
 
+    // Enhanced auth state check with more detailed logging
     onAuthStateChanged(auth, (user) => {
-      if (!user || user.email !== "mangotangodev.ph@gmail.com") {
+      console.log('Auth state changed. User:', user ? user.email : 'No user');
+      if (!user) {
+        console.log('No user logged in, redirecting to login');
         window.location.href = "admin-login.html";
+        return;
+      }
+      
+      // Check if the logged-in user is the admin
+      if (user.email !== "mangotangodev.ph@gmail.com") {
+        console.log('Non-admin user detected, redirecting to login');
+        signOut(auth).then(() => {
+          window.location.href = "admin-login.html";
+        });
+      } else {
+        console.log('Admin user authenticated:', user.email);
+        // Initialize page only if user is properly authenticated
+        initializePage();
       }
     });
 
@@ -110,69 +127,96 @@
       window.location.replace("admin-login.html");
     });
 
-    function loadExperts() {
-      const expertsTable = document.querySelector(".approval-table tbody");
-      const expertsRef = collection(db, "technician");
+    async function loadExperts() {
+  console.log("loadExperts() called");
+  const expertsTable = document.querySelector(".approval-table tbody");
+  if (!expertsTable) {
+    console.error("Could not find .approval-table tbody element!");
+    return;
+  }
 
-      onSnapshot(expertsRef, (snapshot) => {
-        console.log("Approval: Received snapshot with", snapshot.size, "documents");
-        expertsTable.innerHTML = "";
-        let approved = 0, pending = 0;
+  try {
+    console.log("Attempting to fetch technicians...");
+    const querySnapshot = await getDocs(collection(db, "technician"));
+    console.log(`Found ${querySnapshot.size} technicians`);
 
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          console.log("Approval: Document data:", data);
-          let status = "Pending";
-          if (data.status === "Approved") status = "Approved";
-          else if (data.status === "Rejected") status = "Rejected";
-
-          if (status === "Approved") approved++;
-          if (status === "Pending") pending++;
-
-          expertsTable.innerHTML += `
-            <tr class="expert-row" data-id="${docSnap.id}" style="cursor: pointer;">
-              <td>${data.firstName || ""} ${data.lastName || ""}</td>
-              <td>${data.expertise || "-"}</td>
-              <td>${data.registrationDate || "-"}</td>
-              <td><span class="status ${status.toLowerCase()}">${status}</span></td>
-              <td>
-                ${status === "Pending" ? `
-                  <button class="approve-btn" data-id="${docSnap.id}">Approve</button>
-                  <button class="reject-btn" data-id="${docSnap.id}">Reject</button>
-                ` : ""}
-              </td>
-            </tr>
-          `;
-        });
-
-        console.log("Approval: Counts - Approved:", approved, "Pending:", pending);
-        document.getElementById("approvedExperts").innerText = approved;
-        document.getElementById("pendingExperts").innerText = pending;
-
-        document.querySelectorAll(".expert-row").forEach(row => {
-          row.addEventListener("click", (e) => {
-            if (e.target.tagName === 'BUTTON') return;
-            const id = row.getAttribute("data-id");
-            window.location.href = `register.html?id=${id}`;
-          });
-        });
-
-        document.querySelectorAll(".approve-btn").forEach(btn => {
-          btn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            updateStatus(btn.dataset.id, "Approved");
-          });
-        });
-        document.querySelectorAll(".reject-btn").forEach(btn => {
-          btn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            updateStatus(btn.dataset.id, "Rejected");
-          });
-        });
-      }, (error) => {
-        console.error("Approval: Error fetching data:", error);
-      });
+    if (querySnapshot.empty) {
+      console.log("No technicians found in the database");
+      showNotification("No technician records found.", "info");
+      return;
     }
+
+    // Clear existing table
+    expertsTable.innerHTML = "";
+    let approved = 0, pending = 0, rejected = 0;
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      console.log("Processing technician:", data.email);
+      
+      const status = data.status || "Pending";
+      if (status === "Approved") approved++;
+      if (status === "Pending") pending++;
+      if (status === "Rejected") rejected++;
+
+      const row = document.createElement("tr");
+      row.className = "expert-row";
+      row.setAttribute("data-id", doc.id);
+      row.style.cursor = "pointer";
+
+      row.innerHTML = `
+        <td>${data.firstName || ""} ${data.lastName || ""}</td>
+        <td>${data.expertise || "-"}</td>
+        <td>${data.registrationDate || "-"}</td>
+        <td><span class="status ${status.toLowerCase()}">${status}</span></td>
+        <td>
+          ${status === "Pending" ? `
+            <button class="approve-btn" data-id="${doc.id}">Approve</button>
+            <button class="reject-btn" data-id="${doc.id}">Reject</button>
+          ` : ""}
+        </td>
+      `;
+
+      // Add click handlers for buttons
+      const approveBtn = row.querySelector('.approve-btn');
+      const rejectBtn = row.querySelector('.reject-btn');
+      
+      if (approveBtn) {
+        approveBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          updateStatus(doc.id, "Approved");
+        });
+      }
+      
+      if (rejectBtn) {
+        rejectBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          updateStatus(doc.id, "Rejected");
+        });
+      }
+
+      // Add row click handler
+      row.addEventListener('click', (e) => {
+        if (e.target.tagName !== 'BUTTON') {
+          window.location.href = `register.html?id=${doc.id}`;
+        }
+      });
+
+      expertsTable.appendChild(row);
+    });
+
+    // Update counters
+    document.getElementById("approvedExperts").textContent = approved;
+    document.getElementById("pendingExperts").textContent = pending;
+
+    console.log(`Totals - Approved: ${approved}, Pending: ${pending}, Rejected: ${rejected}`);
+
+  } catch (error) {
+    console.error("Error loading technicians:", error);
+    showNotification(`Error loading data: ${error.message}`, "error");
+  }
+}
+    
 
     async function updateStatus(docId, newStatus) {
   try {
@@ -194,57 +238,34 @@
 
     showNotification(`Technician ${newStatus}!`, "success");
 
-    // -------------------------------
-    // 🚀 SEND EMAIL THROUGH NODE.JS
-    // -------------------------------
-    if (newStatus === "Approved") {
-      try {
-        const response = await fetch("http://localhost:3001/approve-tech", {
-    method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: technicianData.email,
-            name: fullName
-          })
-        });
-        
-        if (response.ok) {
-          showNotification(`Approval email sent to ${technicianData.email}`, "success");
-        } else {
-          showNotification("Failed to send approval email", "error");
-        }
-      } catch (error) {
-        console.error("Error sending approval email:", error);
-        showNotification("Error sending approval email", "error");
-      }
-    } else if (newStatus === "Rejected") {
-      try {
-        const reason = prompt("Please provide a reason for rejection (optional):", "");
-        const response = await fetch("http://localhost:3001/decline-tech", {
-    method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: technicianData.email,
-            name: fullName,
-            reason: reason || "No reason provided"
-          })
-        });
-        
-        if (response.ok) {
-          showNotification(`Rejection email sent to ${technicianData.email}`, "success");
-        } else {
-          showNotification("Failed to send rejection email", "error");
-        }
-      } catch (error) {
-        console.error("Error sending rejection email:", error);
-        showNotification("Error sending rejection email", "error");
-      }
+    // Use relative paths that will work with Vercel
+    const endpoint = newStatus === "Approved" 
+      ? '/api/approve-tech' 
+      : '/api/decline-tech';
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: technicianData.email,
+        name: fullName,
+        ...(newStatus === "Rejected" && { reason: "Your application was not approved" })
+      })
+    });
+
+    if (response.ok) {
+      showNotification(`Email sent to ${technicianData.email}`, "success");
+    } else {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to send email');
     }
-  } catch (err) {
-    console.error("Error updating status:", err);
-    showNotification(`Error: ${err.message}`, "error");
+
+  } catch (error) {
+    console.error("Error updating status:", error);
+    showNotification(`Error: ${error.message}`, "error");
   }
 }
+
     function showNotification(message, type) {
       const notification = document.createElement('div');
       notification.className = `notification ${type}`;
@@ -262,9 +283,23 @@
       }, 5000);
     }
 
-    window.addEventListener("DOMContentLoaded", async () => {
-      await Promise.all([loadExperts(), initNotifications(db)]);
-    });
+    // Initialize the page
+    async function initializePage() {
+      console.log("Initializing page...");
+      try {
+        await Promise.all([
+          loadExperts(),
+          initNotifications ? initNotifications(db) : Promise.resolve()
+        ]);
+        console.log("Page initialization complete");
+      } catch (error) {
+        console.error("Error during page initialization:", error);
+        showNotification(`Initialization error: ${error.message}`, 'error');
+      }
+    }
+
+    // Remove auto-initialization - we'll call it after auth check
+    console.log('Script loaded, waiting for authentication...');
 
     window.addEventListener('popstate', () => {
       if (!auth.currentUser) {

@@ -117,10 +117,12 @@
       </div>
     </div>
 
-    <div id="certificateModal" class="modal" style="display: none;">
+    <div id="certificateModal" class="0
+    
+    modal" style="display: none;">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>Certificate - Full View</h3>
+          <h3>Credential - Full View</h3>
           <button class="modal-close" id="closeModal">&times;</button>
         </div>
         <div class="modal-body">
@@ -128,13 +130,11 @@
             style="max-width: 100%; max-height: 80vh; object-fit: contain;">
         </div>
         <div class="modal-footer">
-          <button id="modalDownload" class="btn-primary">📥 Download Certificate</button>
+          <button id="modalDownload" class="btn-primary"> Download Certificate</button>
           <button id="modalClose" class="btn-secondary">Close</button>
         </div>
       </div>
     </div>
-
-    <script src="firebase-email-service.js"></script>
 
     <script type="module">
       import { db, auth, rtdb } from "./firebase-config.js";
@@ -326,107 +326,16 @@
           } else {
             alert("Technician not found!");
             window.location.href = "approval.html";
+            return;
           }
         } catch (error) {
-          console.error("Error loading technician:", error);
-          alert("Error loading technician data: " + error.message);
+          console.error("Error loading technician data:", error);
+          alert("An error occurred while loading technician data. Please try again.");
+          console.error(error);
         }
       }
 
-      document.getElementById("approveBtn").addEventListener("click", async () => {
-        try {
-          const technicianDoc = await getDoc(doc(db, "technician", technicianId));
-
-          if (!technicianDoc.exists()) {
-            alert("❌ Technician not found");
-            return;
-          }
-
-          const data = technicianDoc.data();
-
-          // Update Firestore first
-          await updateDoc(doc(db, "technician", technicianId), {
-            status: "Approved",
-            updatedAt: new Date().toISOString(),
-            updatedBy: "mangotangodev.ph@gmail.com"
-          });
-
-          // Secure backend email call
-          const response = await fetch("http://localhost:3001/approve-tech", {
-    method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: data.email,
-              name: `${data.firstName} ${data.lastName}`
-            })
-          });
-
-          const result = await response.json();
-
-          if (result.success) {
-            alert(`✅ Technician approved!\n📧 Email sent to ${data.email}`);
-          } else {
-            alert(`⚠️ Approved, but email failed: ${result.error}`);
-          }
-
-          window.location.href = "approval.html";
-
-        } catch (error) {
-          alert("Error approving technician: " + error.message);
-        }
-      });
-
-      document.getElementById("rejectBtn").addEventListener("click", async () => {
-        try {
-          const technicianDoc = await getDoc(doc(db, "technician", technicianId));
-
-          if (!technicianDoc.exists()) {
-            alert("❌ Technician not found");
-            return;
-          }
-
-          const data = technicianDoc.data();
-
-          // Ask for a decline reason (optional)
-          const reason = prompt("Enter reason for rejection (optional):") || "";
-
-          // Update Firestore
-          await updateDoc(doc(db, "technician", technicianId), {
-            status: "Rejected",
-            updatedAt: new Date().toISOString(),
-            updatedBy: "mangotangodev.ph@gmail.com"
-          });
-
-          // Secure backend email call
-          const response = await fetch("http://localhost:3001/decline-tech", {
-    method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: data.email,
-              name: `${data.firstName} ${data.lastName}`,
-              reason: reason
-            })
-          });
-
-          const result = await response.json();
-
-          if (result.success) {
-            alert(`❌ Technician rejected.\n📧 Rejection email sent to ${data.email}`);
-          } else {
-            alert(`⚠️ Rejected, but email failed: ${result.error}`);
-          }
-
-          window.location.href = "approval.html";
-
-        } catch (error) {
-          alert("Error rejecting technician: " + error.message);
-        }
-      });
-
       function setupModalEvents() {
-        const certificatePreview = document.getElementById("certificatePreview");
-        const viewFullScreen = document.getElementById("viewFullScreen");
-        const downloadCertificate = document.getElementById("downloadCertificate");
         const certificateModal = document.getElementById("certificateModal");
         const modalCertificateImage = document.getElementById("modalCertificateImage");
         const closeModal = document.getElementById("closeModal");
