@@ -1,6 +1,5 @@
-import nodemailer from 'nodemailer';
+﻿import nodemailer from "nodemailer";
 
-// Configure nodemailer
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -10,21 +9,31 @@ const transporter = nodemailer.createTransport({
 });
 
 export default async function handler(req, res) {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'POST') {
-    return res.status(405).json({ success: false, error: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: "Method not allowed" });
   }
 
   try {
-    const { email, name, reason = 'No reason provided' } = req.body;
-    
+    const { email, name, reason = "No reason provided" } = req.body;
+
     if (!email || !name) {
-      return res.status(400).json({ success: false, error: 'Missing required fields' });
+      return res.status(400).json({ success: false, error: "Missing required fields" });
     }
-    
+
     await transporter.sendMail({
-      from: '"MangoTango Admin" <mangotangodev.ph@gmail.com>',
+      from: "\"MangoTango Admin\" <mangotangodev.ph@gmail.com>",
       to: email,
-      subject: 'Update on Your MangoTango Technician Application',
+      subject: "Update on Your MangoTango Technician Application",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 650px; margin: auto; padding: 20px; color:#333; line-height: 1.6;">
           <h2 style="color:#D32F2F;">Your Technician Application Status</h2>
@@ -54,13 +63,17 @@ export default async function handler(req, res) {
       `
     });
 
-    return res.status(200).json({ success: true });
+    return res.status(200).json({ 
+      success: true,
+      message: 'Rejection email sent successfully'
+    });
+
   } catch (error) {
-    console.error('Error in decline-tech API:', error);
-    return res.status(500).json({ 
-      success: false, 
-      error: 'Failed to send rejection email',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    console.error("Error in decline-tech API:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to send rejection email",
+      details: process.env.NODE_ENV === "development" ? error.message : undefined
     });
   }
 }

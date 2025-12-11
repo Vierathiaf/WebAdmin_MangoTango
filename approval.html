@@ -229,41 +229,97 @@
     const technicianData = technicianDoc.data();
     const fullName = `${technicianData.firstName} ${technicianData.lastName}`;
 
-    // Update Firestore status
-    await updateDoc(doc(db, "technician", docId), {
-      status: newStatus,
-      updatedAt: new Date().toISOString(),
-      updatedBy: "mangotangodev.ph@gmail.com"
-    });
-
-    showNotification(`Technician ${newStatus}!`, "success");
-
-    // Use relative paths that will work with Vercel
+    // Determine the endpoint based on the action
     const endpoint = newStatus === "Approved" 
       ? '/api/approve-tech' 
       : '/api/decline-tech';
 
+    // Prepare the request body
+    const requestBody = {
+      email: technicianData.email,
+      name: fullName
+    };
+
+    // Add reason for rejection
+    if (newStatus === "Rejected") {
+      const reason = prompt("Please provide a reason for rejection:");
+      if (!reason) {
+        showNotification("Rejection reason is required", "error");
+        return;
+      }
+      requestBody.reason = reason;
+    }
+
+    console.log(`Sending ${newStatus} request to:`, endpoint, requestBody);
+
+    // Make the API call
     const response = await fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: technicianData.email,
-        name: fullName,
-        ...(newStatus === "Rejected" && { reason: "Your application was not approved" })
-      })
+      headers: { 
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify(requestBody)
     });
 
-    if (response.ok) {
-      showNotification(`Email sent to ${technicianData.email}`, "success");
-    } else {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to send email');
+    const responseData = await response.json();
+    console.log("API Response:", responseData);
+
+    if (!response.ok) {
+      throw new Error(responseData.error || 'Failed to process request');
     }
+
+    // Update Firestore status after successful API call
+    await updateDoc(doc(db, "technician", docId), {
+      status: newStatus,
+      updatedAt: new Date().toISOString(),
+      updatedBy: "admin"
+    });
+
+    // Update the UI
+    const row = document.querySelector(`.expert-row[data-id="${docId}"]`);
+    if (row) {
+      const statusCell = row.querySelector('.status');
+      if (statusCell) {
+        statusCell.textContent = newStatus;
+        statusCell.className = `status ${newStatus.toLowerCase()}`;
+      }
+      
+      // Remove action buttons
+      const actionCell = row.querySelector('td:last-child');
+      if (actionCell) {
+        actionCell.innerHTML = ''; // Clear the buttons
+      }
+    }
+
+    // Update counters
+    updateCounters();
+
+    showNotification(`Technician ${newStatus.toLowerCase()} successfully!`, "success");
 
   } catch (error) {
     console.error("Error updating status:", error);
     showNotification(`Error: ${error.message}`, "error");
   }
+}
+
+// Add this helper function to update the counters
+function updateCounters() {
+  const rows = document.querySelectorAll('.expert-row');
+  let approved = 0;
+  let pending = 0;
+  
+  rows.forEach(row => {
+    const statusCell = row.querySelector('.status');
+    if (statusCell) {
+      const status = statusCell.textContent.trim();
+      if (status === 'Approved') approved++;
+      if (status === 'Pending') pending++;
+    }
+  });
+  
+  document.getElementById("approvedExperts").textContent = approved;
+  document.getElementById("pendingExperts").textContent = pending;
 }
 
     function showNotification(message, type) {

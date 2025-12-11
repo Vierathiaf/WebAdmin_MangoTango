@@ -15,7 +15,7 @@
     "nodemailer": "^7.0.11"
   },
   "devDependencies": {
-    "@vercel/node": "^4.2.6",
+    "@vercel/node": "^5.5.15",
     "vercel": "^33.5.2"
   }
 }
